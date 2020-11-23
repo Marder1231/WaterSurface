@@ -24,16 +24,20 @@
 
 *************************************************************************/
 
+#include <glad/glad.h>
+
 #include <iostream>
 #include <Fl/fl.h>
 
 // we will need OpenGL, and OpenGL needs windows.h
 #include <windows.h>
 //#include "GL/gl.h"
-#include <glad/glad.h>
-#include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <GL/glu.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 
 #include "TrainView.H"
 #include "TrainWindow.H"
@@ -193,9 +197,9 @@ void TrainView::draw()
 		if (!this->shader)
 			this->shader = new
 			Shader(
-				"../WaterSurface/src/shaders/simple.vert", 
+				"./shaders/simple.vert", 
 				nullptr, nullptr, nullptr, 
-				"../WaterSurface/src/shaders/simple.frag");
+				"./shaders/simple.frag");
 
 		if (!this->commom_matrices)
 			this->commom_matrices = new UBO();
@@ -260,7 +264,7 @@ void TrainView::draw()
 		}
 
 		if (!this->texture)
-			this->texture = new Texture2D("../WaterSurface/Images/church.png");
+			this->texture = new Texture2D("./Images/church.png");
 
 		if (!this->device){
 			//Tutorial: https://ffainelli.github.io/openal-example/
@@ -407,7 +411,7 @@ void TrainView::draw()
 
 	setupFloor();
 	glDisable(GL_LIGHTING);
-	drawFloor(200,10);
+	//drawFloor(200,10);
 
 
 	//*********************************************************************
@@ -436,10 +440,10 @@ void TrainView::draw()
 	glm::mat4 model_matrix = glm::mat4();
 	model_matrix = glm::translate(model_matrix, this->source_pos);
 	model_matrix = glm::scale(model_matrix, glm::vec3(10.0f, 10.0f, 10.0f));
-	glUniformMatrix4fv(glGetUniformLocation(this->shader->Program, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
-	glUniform3fv(glGetUniformLocation(this->shader->Program, "u_color"), 1, &glm::vec3(0.0f, 1.0f, 0.0f)[0]);
+	glUniformMatrix4fv(glGetUniformLocation(this->shader->ID, "u_model"), 1, GL_FALSE, &model_matrix[0][0]);
+	glUniform3fv(glGetUniformLocation(this->shader->ID, "u_color"), 1, &glm::vec3(0.0f, 1.0f, 0.0f)[0]);
 	this->texture->bind(0);
-	glUniform1i(glGetUniformLocation(this->shader->Program, "u_texture"), 0);
+	glUniform1i(glGetUniformLocation(this->shader->ID, "u_texture"), 0);
 	
 	//bind VAO
 	glBindVertexArray(this->plane->vao);
@@ -451,6 +455,175 @@ void TrainView::draw()
 
 	//unbind shader(switch to fixed pipeline)
 	glUseProgram(0);
+
+	Shader lightingShader("./shaders/colors.vert", nullptr, nullptr, nullptr, "./shaders/color.frag");
+	Shader lightCubeShader("./shaders/lightCbue.vert", nullptr, nullptr, nullptr, "./shaders/lightCube.frag");
+
+
+	float vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+	};
+	// first, configure the cube's VAO (and VBO)
+	unsigned int VBO, cubeVAO;
+	glGenVertexArrays(1, &cubeVAO);
+	glGenBuffers(1, &VBO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindVertexArray(cubeVAO);
+
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	// normal attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+
+	// second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
+	unsigned int lightCubeVAO;
+	glGenVertexArrays(1, &lightCubeVAO);
+	glBindVertexArray(lightCubeVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	// note that we update the lamp's position attribute's stride to reflect the updated buffer data
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+	// be sure to activate shader when setting uniforms/drawing objects
+	lightingShader.Use();
+	lightingShader.setVec3("light.position", lightPos);
+	lightingShader.setVec3("viewPos", arcball.eyeX, arcball.eyeY, arcball.eyeZ);
+
+	// light properties
+	glm::vec3 lightColor;
+	lightColor.x = sin(tw->speed->value() * 2.0f);
+	lightColor.y = sin(tw->speed->value() * 0.7f);
+	lightColor.z = sin(tw->speed->value() * 1.3f);
+	glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // decrease the influence
+	glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+	lightingShader.setVec3("light.ambient", 1.0f, 1.0f, 1.0f);
+	lightingShader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+	lightingShader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+	// material properties
+	lightingShader.setVec3("material.ambient", 0.24725f, 0.1995f, 0.0745f);
+	lightingShader.setVec3("material.diffuse", 0.75164f, 0.60648f, 0.22648f);
+	lightingShader.setVec3("material.specular", 0.628281f, 0.555802f, 0.366065f); // specular lighting doesn't have full effect on this object's material
+	lightingShader.setFloat("material.shininess", 0.4f);
+
+	// view/projection transformations
+	glm::mat4 projection;
+	glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+	glm::mat4 view;
+	glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+	lightingShader.setMat4("projection", projection);
+	lightingShader.setMat4("view", view);
+
+	// world transformation
+	glm::mat4 model = glm::mat4(1.0f);
+	lightingShader.setMat4("model", model);
+
+	// render the cube
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
+	// also draw the lamp object
+	lightCubeShader.Use();
+	lightCubeShader.setMat4("projection", projection);
+	lightCubeShader.setMat4("view", view);
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, lightPos);
+	model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+	lightCubeShader.setMat4("model", model);
+
+	glBindVertexArray(lightCubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+	//lightingShader.Use();
+	//lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+	//lightingShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+	//lightingShader.setVec3("lightPos", lightPos);
+	//lightingShader.setVec3("viewPos", arcball.eyeX, arcball.eyeY, arcball.eyeZ);
+
+	//// view/projection transformations
+	//glm::mat4 projection;
+	//glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+	//glm::mat4 view;
+	//glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+	//lightingShader.setMat4("projection", projection);
+	//lightingShader.setMat4("view", view);
+
+	//// world transformation
+	//glm::mat4 model = glm::mat4(1.0f);
+	//lightingShader.setMat4("model", model);
+
+	//// render the cube
+	//glBindVertexArray(cubeVAO);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	//// also draw the lamp object
+	//lightCubeShader.Use();
+	//lightCubeShader.setMat4("projection", projection);
+	//lightCubeShader.setMat4("view", view);
+	//model = glm::mat4(1.0f);
+	//model = glm::translate(model, lightPos);
+	//model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+	//lightCubeShader.setMat4("model", model);
+
+	//glBindVertexArray(lightCubeVAO);
+	//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	// optional: de-allocate all resources once they've outlived their purpose:
+	// ------------------------------------------------------------------------
+	glDeleteVertexArrays(1, &cubeVAO);
+	glDeleteVertexArrays(1, &lightCubeVAO);
+	glDeleteBuffers(1, &VBO);
 }
 
 //************************************************************************
@@ -529,6 +702,9 @@ void TrainView::drawStuff(bool doingShadows)
 			m_pTrack->points[i].draw();
 		}
 	}
+
+	
+
 	// draw the track
 	//####################################################################
 	// TODO: 
@@ -634,4 +810,29 @@ void TrainView::setUBO()
 	glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection_matrix[0][0]);
 	glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &view_matrix[0][0]);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+glm::vec3 TrainView::ExtractCameraPos(const glm::mat4& a_modelView)
+{ 
+	glm::mat4 modelViewT = transpose(a_modelView);
+
+	// Get plane normals 
+	glm::vec3 n1(modelViewT[0]);
+	glm::vec3 n2(modelViewT[1]);
+	glm::vec3 n3(modelViewT[2]);
+
+	// Get plane distances
+	float d1(modelViewT[0].w);
+	float d2(modelViewT[1].w);
+	float d3(modelViewT[2].w);
+
+	// Get the intersection of these 3 planes
+	// http://paulbourke.net/geometry/3planes/
+	glm::vec3 n2n3 = cross(n2, n3);
+	glm::vec3 n3n1 = cross(n3, n1);
+	glm::vec3 n1n2 = cross(n1, n2);
+	glm::vec3 top = (n2n3 * d1) + (n3n1 * d2) + (n1n2 * d3);
+	float denom = dot(n1, n2n3);
+
+	return top / -denom;
 }

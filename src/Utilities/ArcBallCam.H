@@ -172,6 +172,9 @@ class ArcBallCam {
 		// assume the window does it
 		void getMouseNDC(float& x, float& y);
 
+		float				eyeX;		// in eyeX, eyeY, but this is the displacement for undoing the last
+		float				eyeY;		// addition
+		float				eyeZ;
 	private:
 		// This keeps track of the rotation - the current rotation is
 		// start*now
@@ -192,10 +195,6 @@ class ArcBallCam {
 		
 		float				panX;		// this keeps track of the panning - the current pan is 
 		float				panY;		
-
-		float				eyeX;		// in eyeX, eyeY, but this is the displacement for undoing the last
-		float				eyeY;		// addition
-		float				eyeZ;
 
 		float				initEyeZ;
 		float				fieldOfView; // View of field

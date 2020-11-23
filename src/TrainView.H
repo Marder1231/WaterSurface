@@ -86,6 +86,9 @@ class TrainView : public Fl_Gl_Window
 
 		//set ubo
 		void setUBO();
+
+		//reference : https://community.khronos.org/t/extracting-camera-position-from-a-modelview-matrix/68031
+		glm::vec3 ExtractCameraPos(const glm::mat4& a_modelView);
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected

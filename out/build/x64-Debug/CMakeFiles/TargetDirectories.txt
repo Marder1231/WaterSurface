@@ -1,0 +1,4 @@
+D:/Practicum/CG/WaterSurface/out/build/x64-Debug/CMakeFiles/WaterSurface.dir
+D:/Practicum/CG/WaterSurface/out/build/x64-Debug/CMakeFiles/Utilities.dir
+D:/Practicum/CG/WaterSurface/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+D:/Practicum/CG/WaterSurface/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir
