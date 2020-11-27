@@ -26,9 +26,17 @@
 
 #pragma once
 
+#include <glad/glad.h>
+#include <GL/glu.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "RenderUtilities/BufferObject.h"
 #include "RenderUtilities/Shader.h"
 #include "RenderUtilities/Texture.h"
+
+
 
 // Preclarify for preventing the compiler error
 class TrainWindow;
@@ -59,6 +67,235 @@ class CTrack;
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
 
+
+class BoxShader
+{
+public:
+	Texture2D* DiffuseMap = nullptr;
+	Texture2D* SpecularMap = nullptr;
+	
+	struct DirLight
+	{
+		glm::vec3 direction;
+
+		glm::vec3 ambient;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+	};
+
+	struct PointLight
+	{
+		glm::vec3 position;
+
+		float constant;
+		float linear;
+		float quadratic;
+
+		glm::vec3 ambient;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+	};
+
+	struct SpotLight 
+	{
+		glm::vec3 position;
+		glm::vec3 direction;
+		float cutOff;
+		float outerCutOff;
+
+		float constant;
+		float linear;
+		float quadratic;
+
+		glm::vec3 ambient;
+		glm::vec3 diffuse;
+		glm::vec3 specular;
+	};
+
+	Shader* shader = nullptr;
+
+	VAO Vao;
+
+	BoxShader()
+	{
+
+	}
+
+	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
+	{
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
+	void SetVAO()
+	{
+		float vertices[] = {
+			// positions          // normals           // texture coords
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+		};
+
+		glGenVertexArrays(1, &this->Vao.vao);
+		glGenBuffers(1, this->Vao.vbo);
+
+		glBindVertexArray(this->Vao.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
+
+	void SetTexture(const GLchar* diffuse, const GLchar* specular)
+	{
+		if (DiffuseMap != nullptr)
+			delete DiffuseMap;
+		if (SpecularMap != nullptr)
+			delete SpecularMap;
+
+		DiffuseMap = new Texture2D(diffuse);
+		SpecularMap = new Texture2D(specular);
+	}
+
+	/// <summary>
+	/// setting material which is never change
+	/// </summary>
+	void Init()
+	{
+		shader->setInt("material.diffuse", 0);
+		shader->setInt("material.specular", 1);
+	}
+
+	void Use(glm::vec3 viewPos, 
+	/*environment attribute*/ DirLight dirL, PointLight pointL[4], SpotLight spotL)
+	{
+		shader->Use();
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		//directional light
+		shader->setVec3("dirLight.direction", dirL.direction);
+		shader->setVec3("dirLight.ambient", dirL.ambient);
+		shader->setVec3("dirLight.diffuse", dirL.diffuse);
+		shader->setVec3("dirLight.specular", dirL.specular);
+
+		// point light 1
+		shader->setVec3("pointLights[0].position",	 pointL[0].position);
+		shader->setVec3("pointLights[0].ambient",	 pointL[0].ambient);
+		shader->setVec3("pointLights[0].diffuse",	 pointL[0].diffuse);
+		shader->setVec3("pointLights[0].specular",	 pointL[0].specular);
+		shader->setFloat("pointLights[0].constant",  pointL[0].constant);
+		shader->setFloat("pointLights[0].linear",	 pointL[0].linear);
+		shader->setFloat("pointLights[0].quadratic", pointL[0].quadratic);
+
+		// point light 2
+		shader->setVec3 ("pointLights[1].position",  pointL[1].position);
+		shader->setVec3 ("pointLights[1].ambient",   pointL[1].ambient);
+		shader->setVec3 ("pointLights[1].diffuse",   pointL[1].diffuse);
+		shader->setVec3 ("pointLights[1].specular",  pointL[1].specular);
+		shader->setFloat("pointLights[1].constant",  pointL[1].constant);
+		shader->setFloat("pointLights[1].linear",	 pointL[1].linear);
+		shader->setFloat("pointLights[1].quadratic", pointL[1].quadratic);
+
+		// point light 3
+		shader->setVec3 ("pointLights[2].position",  pointL[2].position);
+		shader->setVec3 ("pointLights[2].ambient",   pointL[2].ambient);
+		shader->setVec3 ("pointLights[2].diffuse",   pointL[2].diffuse);
+		shader->setVec3 ("pointLights[2].specular",  pointL[2].specular);
+		shader->setFloat("pointLights[2].constant",  pointL[2].constant);
+		shader->setFloat("pointLights[2].linear",	 pointL[2].linear);
+		shader->setFloat("pointLights[2].quadratic", pointL[2].quadratic);
+
+		// point light 3
+		shader->setVec3 ("pointLights[3].position",  pointL[3].position);
+		shader->setVec3 ("pointLights[3].ambient",	 pointL[3].ambient);
+		shader->setVec3 ("pointLights[3].diffuse",	 pointL[3].diffuse);
+		shader->setVec3 ("pointLights[3].specular",  pointL[3].specular);
+		shader->setFloat("pointLights[3].constant",  pointL[3].constant);
+		shader->setFloat("pointLights[3].linear",	 pointL[3].linear);
+		shader->setFloat("pointLights[3].quadratic", pointL[3].quadratic);
+
+		// spotLight
+		shader->setVec3("spotLight.position", spotL.position);
+		shader->setVec3("spotLight.direction", spotL.direction);
+		shader->setVec3("spotLight.ambient", spotL.ambient);
+		shader->setVec3("spotLight.diffuse", spotL.diffuse);
+		shader->setVec3("spotLight.specular", spotL.specular);
+		shader->setFloat("spotLight.constant", spotL.constant);
+		shader->setFloat("spotLight.linear", spotL.linear);
+		shader->setFloat("spotLight.quadratic", spotL.quadratic);
+		shader->setFloat("spotLight.cutOff", spotL.cutOff);
+		shader->setFloat("spotLight.outerCutOff", spotL.outerCutOff);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+
+
+
+		DiffuseMap->bind(0);
+		SpecularMap->bind(1);
+
+		glBindVertexArray(this->Vao.vao);
+	}
+
+	void Draw(/*object attribute*/glm::vec3 objectPosition, GLfloat angle, glm::vec3 rotateAxis)
+	{
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, objectPosition);
+		model = glm::rotate(model, glm::radians(angle), rotateAxis);
+		shader->setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
+
 class TrainView : public Fl_Gl_Window
 {
 	public:
@@ -87,8 +324,7 @@ class TrainView : public Fl_Gl_Window
 		//set ubo
 		void setUBO();
 
-		//reference : https://community.khronos.org/t/extracting-camera-position-from-a-modelview-matrix/68031
-		glm::vec3 ExtractCameraPos(const glm::mat4& a_modelView);
+		int LoadTexture(const char* path);
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
@@ -96,10 +332,10 @@ class TrainView : public Fl_Gl_Window
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
 
-		Shader* shader		= nullptr;
-		Texture2D* texture	= nullptr;
-		VAO* plane			= nullptr;
-		UBO* commom_matrices= nullptr;
+		//Shader* shader		= nullptr;
+		//Texture2D* texture	= nullptr;
+		//VAO* plane			= nullptr;
+		//UBO* commom_matrices= nullptr;
 
 		//OpenAL
 		glm::vec3 source_pos;
@@ -109,5 +345,5 @@ class TrainView : public Fl_Gl_Window
 		ALuint source;
 		ALuint buffer;
 
-
+		BoxShader boxShader;
 };

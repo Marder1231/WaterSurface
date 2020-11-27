@@ -38,6 +38,7 @@ public:
 
 	Type type = Type::NULL_SHADER;
 	// Constructor generates the shader on the fly
+	Shader() { }
 	Shader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
 	{
 		std::vector<GLuint> shaders;
@@ -90,6 +91,11 @@ public:
 	void Use()
 	{
 		glUseProgram(this->ID);
+	}
+
+	void Unuse()
+	{
+		glUseProgram(0);
 	}
 
 	// utility uniform functions

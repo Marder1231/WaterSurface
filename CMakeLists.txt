@@ -39,7 +39,7 @@ add_executable(WaterSurface
     ${SRC_RENDER_UTILITIES}
 
     ${INCLUDE_DIR}glad4.6/src/glad.c
-)
+ "src/std_image.h" "src/RenderUtilities/Texture.cpp")
 source_group("shaders" FILES ${SRC_SHADER})
 source_group("RenderUtilities" FILES ${SRC_RENDER_UTILITIES})
 
@@ -50,7 +50,7 @@ add_library(Utilities
     ${SRC_DIR}Utilities/Pnt3f.h
     ${SRC_DIR}Utilities/ArcBallCam.cpp
     ${SRC_DIR}Utilities/3DUtils.cpp
-    ${SRC_DIR}Utilities/Pnt3f.cpp)
+    ${SRC_DIR}Utilities/Pnt3f.cpp "src/std_image.h" "src/RenderUtilities/Texture.cpp")
 
 target_link_libraries(WaterSurface 
     debug ${LIB_DIR}Debug/fltk_formsd.lib      optimized ${LIB_DIR}Release/fltk_forms.lib

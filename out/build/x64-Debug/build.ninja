@@ -106,6 +106,15 @@ build CMakeFiles\WaterSurface.dir\include\glad4.6\src\glad.c.obj: C_COMPILER__Wa
   TARGET_COMPILE_PDB = CMakeFiles\WaterSurface.dir\
   TARGET_PDB = WaterSurface.pdb
 
+build CMakeFiles\WaterSurface.dir\src\RenderUtilities\Texture.cpp.obj: CXX_COMPILER__WaterSurface_Debug ..\..\..\src\RenderUtilities\Texture.cpp || cmake_object_order_depends_target_WaterSurface_Debug
+  DEFINES = -D_XKEYCHECK_H
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  INCLUDES = -I..\..\..\include -I..\..\..\include\glad4.6\include -I..\..\..\include\glm-0.9.8.5\glm
+  OBJECT_DIR = CMakeFiles\WaterSurface.dir
+  OBJECT_FILE_DIR = CMakeFiles\WaterSurface.dir\src\RenderUtilities
+  TARGET_COMPILE_PDB = CMakeFiles\WaterSurface.dir\
+  TARGET_PDB = WaterSurface.pdb
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target WaterSurface
@@ -114,7 +123,7 @@ build CMakeFiles\WaterSurface.dir\include\glad4.6\src\glad.c.obj: C_COMPILER__Wa
 #############################################
 # Link the executable WaterSurface.exe
 
-build WaterSurface.exe: CXX_EXECUTABLE_LINKER__WaterSurface_Debug CMakeFiles\WaterSurface.dir\src\main.cpp.obj CMakeFiles\WaterSurface.dir\src\CallBacks.cpp.obj CMakeFiles\WaterSurface.dir\src\ControlPoint.cpp.obj CMakeFiles\WaterSurface.dir\src\Track.cpp.obj CMakeFiles\WaterSurface.dir\src\TrainView.cpp.obj CMakeFiles\WaterSurface.dir\src\TrainWindow.cpp.obj CMakeFiles\WaterSurface.dir\include\glad4.6\src\glad.c.obj | ..\..\..\lib\Debug\fltk_formsd.lib ..\..\..\lib\Debug\fltk_gld.lib ..\..\..\lib\Debug\fltk_imagesd.lib ..\..\..\lib\Debug\fltk_jpegd.lib ..\..\..\lib\Debug\fltk_pngd.lib ..\..\..\lib\Debug\fltk_zd.lib ..\..\..\lib\Debug\fltkd.lib ..\..\..\lib\Debug\opencv_world341d.lib ..\..\..\lib\OpenGL32.lib ..\..\..\lib\glu32.lib ..\..\..\lib\common.lib ..\..\..\lib\ex-common.lib ..\..\..\lib\OpenAL32.lib ..\..\..\lib\alut.lib ..\..\..\lib\alut_static.lib Utilities.lib || Utilities.lib
+build WaterSurface.exe: CXX_EXECUTABLE_LINKER__WaterSurface_Debug CMakeFiles\WaterSurface.dir\src\main.cpp.obj CMakeFiles\WaterSurface.dir\src\CallBacks.cpp.obj CMakeFiles\WaterSurface.dir\src\ControlPoint.cpp.obj CMakeFiles\WaterSurface.dir\src\Track.cpp.obj CMakeFiles\WaterSurface.dir\src\TrainView.cpp.obj CMakeFiles\WaterSurface.dir\src\TrainWindow.cpp.obj CMakeFiles\WaterSurface.dir\include\glad4.6\src\glad.c.obj CMakeFiles\WaterSurface.dir\src\RenderUtilities\Texture.cpp.obj | ..\..\..\lib\Debug\fltk_formsd.lib ..\..\..\lib\Debug\fltk_gld.lib ..\..\..\lib\Debug\fltk_imagesd.lib ..\..\..\lib\Debug\fltk_jpegd.lib ..\..\..\lib\Debug\fltk_pngd.lib ..\..\..\lib\Debug\fltk_zd.lib ..\..\..\lib\Debug\fltkd.lib ..\..\..\lib\Debug\opencv_world341d.lib ..\..\..\lib\OpenGL32.lib ..\..\..\lib\glu32.lib ..\..\..\lib\common.lib ..\..\..\lib\ex-common.lib ..\..\..\lib\OpenAL32.lib ..\..\..\lib\alut.lib ..\..\..\lib\alut_static.lib Utilities.lib || Utilities.lib
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = ..\..\..\lib\Debug\fltk_formsd.lib  ..\..\..\lib\Debug\fltk_gld.lib  ..\..\..\lib\Debug\fltk_imagesd.lib  ..\..\..\lib\Debug\fltk_jpegd.lib  ..\..\..\lib\Debug\fltk_pngd.lib  ..\..\..\lib\Debug\fltk_zd.lib  ..\..\..\lib\Debug\fltkd.lib  ..\..\..\lib\Debug\opencv_world341d.lib  ..\..\..\lib\OpenGL32.lib  ..\..\..\lib\glu32.lib  ..\..\..\lib\common.lib  ..\..\..\lib\ex-common.lib  ..\..\..\lib\OpenAL32.lib  ..\..\..\lib\alut.lib  ..\..\..\lib\alut_static.lib  Utilities.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
@@ -162,6 +171,15 @@ build CMakeFiles\Utilities.dir\src\Utilities\Pnt3f.cpp.obj: CXX_COMPILER__Utilit
   TARGET_COMPILE_PDB = CMakeFiles\Utilities.dir\Utilities.pdb
   TARGET_PDB = Utilities.pdb
 
+build CMakeFiles\Utilities.dir\src\RenderUtilities\Texture.cpp.obj: CXX_COMPILER__Utilities_Debug ..\..\..\src\RenderUtilities\Texture.cpp || cmake_object_order_depends_target_Utilities_Debug
+  DEFINES = -D_XKEYCHECK_H
+  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  INCLUDES = -I..\..\..\include -I..\..\..\include\glad4.6\include -I..\..\..\include\glm-0.9.8.5\glm
+  OBJECT_DIR = CMakeFiles\Utilities.dir
+  OBJECT_FILE_DIR = CMakeFiles\Utilities.dir\src\RenderUtilities
+  TARGET_COMPILE_PDB = CMakeFiles\Utilities.dir\Utilities.pdb
+  TARGET_PDB = Utilities.pdb
+
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target Utilities
@@ -170,7 +188,7 @@ build CMakeFiles\Utilities.dir\src\Utilities\Pnt3f.cpp.obj: CXX_COMPILER__Utilit
 #############################################
 # Link the static library Utilities.lib
 
-build Utilities.lib: CXX_STATIC_LIBRARY_LINKER__Utilities_Debug CMakeFiles\Utilities.dir\src\Utilities\ArcBallCam.cpp.obj CMakeFiles\Utilities.dir\src\Utilities\3DUtils.cpp.obj CMakeFiles\Utilities.dir\src\Utilities\Pnt3f.cpp.obj
+build Utilities.lib: CXX_STATIC_LIBRARY_LINKER__Utilities_Debug CMakeFiles\Utilities.dir\src\Utilities\ArcBallCam.cpp.obj CMakeFiles\Utilities.dir\src\Utilities\3DUtils.cpp.obj CMakeFiles\Utilities.dir\src\Utilities\Pnt3f.cpp.obj CMakeFiles\Utilities.dir\src\RenderUtilities\Texture.cpp.obj
   LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64
   OBJECT_DIR = CMakeFiles\Utilities.dir
