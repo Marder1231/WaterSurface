@@ -37,7 +37,6 @@
 #include "RenderUtilities/Texture.h"
 
 
-
 // Preclarify for preventing the compiler error
 class TrainWindow;
 class CTrack;
@@ -67,6 +66,7 @@ class CTrack;
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
 
+#include "../build/Model.h"
 
 class BoxShader
 {
@@ -266,8 +266,8 @@ public:
 		shader->setFloat("spotLight.constant", spotL.constant);
 		shader->setFloat("spotLight.linear", spotL.linear);
 		shader->setFloat("spotLight.quadratic", spotL.quadratic);
-		shader->setFloat("spotLight.cutOff", spotL.cutOff);
-		shader->setFloat("spotLight.outerCutOff", spotL.outerCutOff);
+		shader->setFloat("spotLight.cutOff", glm::cos(glm::radians(spotL.cutOff)));
+		shader->setFloat("spotLight.outerCutOff", glm::cos(glm::radians(spotL.outerCutOff)));
 
 		glm::mat4 projection;
 		glm::mat4 view;
@@ -293,6 +293,155 @@ public:
 		shader->setMat4("model", model);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
+
+class LightCubeShader
+{
+public:
+	Shader* shader = nullptr;
+
+	VAO Vao;
+
+	LightCubeShader() { }
+
+	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
+	{
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
+	void SetVAO()
+	{
+		float vertices[] = {
+			// positions          // normals          
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 
+		};
+
+		glGenVertexArrays(1, &this->Vao.vao);
+		glGenBuffers(1, this->Vao.vbo);
+
+		glBindVertexArray(this->Vao.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);					
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+
+	void Init()
+	{
+		shader->setInt("material.diffuse", 0);
+		shader->setInt("material.specular", 1);
+	}
+
+	void Use(glm::vec3 viewPos)
+	{
+		shader->Use();
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+
+		glBindVertexArray(this->Vao.vao);
+	}
+
+	void Draw(/*object attribute*/glm::vec3 objectPosition)
+	{
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, objectPosition);
+		shader->setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
+
+class ModelShader
+{
+public:
+	Shader* shader = nullptr;
+	Model* model = nullptr;
+
+	VAO Vao;
+
+	ModelShader() { }
+
+	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
+	{
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
+	void SetModel(const GLchar* path)
+	{
+		model = new Model(path);
+	}
+
+	void Draw(glm::vec3 viewPos)
+	{
+		shader->Use();
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+
+		// render the loaded model
+		glm::mat4 modelMat = glm::mat4(1.0f);
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+		shader->setMat4("model", modelMat);
+		model->Draw(*shader);
 	}
 };
 
@@ -346,4 +495,7 @@ class TrainView : public Fl_Gl_Window
 		ALuint buffer;
 
 		BoxShader boxShader;
+		LightCubeShader lightCubeShader;
+
+		ModelShader modelShader;
 };

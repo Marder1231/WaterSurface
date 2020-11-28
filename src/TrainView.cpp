@@ -42,6 +42,9 @@
 #	include "TrainExample/TrainExample.H"
 #endif
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 //************************************************************************
 //
@@ -188,12 +191,27 @@ void TrainView::draw()
 
 		if (boxShader.shader == nullptr)
 		{
-			boxShader.SetShader("../../../src/shaders/colors.vert"
+			boxShader.SetShader("../src/shaders/colors.vert"
 				, nullptr, nullptr, nullptr
-				, "../../../src/shaders/color.frag");
+				, "../src/shaders/color.frag");
 			boxShader.SetVAO();
-			boxShader.SetTexture("../../../Images/container2.png", "../../../Images/specular.png");
+			boxShader.SetTexture("../Images/container2.png", "../Images/specular.png");
 			boxShader.Init();
+		}
+
+		if (lightCubeShader.shader == nullptr)
+		{
+			lightCubeShader.SetShader("../src/shaders/lightCbue.vert"
+				, nullptr, nullptr, nullptr
+				, "../src/shaders/lightCube.frag");
+			lightCubeShader.SetVAO();
+			lightCubeShader.Init();
+		}
+
+		if (modelShader.shader == nullptr)
+		{
+			modelShader.SetShader("../src/shaders/model.vert", nullptr, nullptr, nullptr, "../src/shaders/model.frag");
+			modelShader.SetModel("../Model/nanosuit/nanosuit.obj");
 		}
 	}
 	else
@@ -301,7 +319,6 @@ void TrainView::draw()
 		unsetupShadows();
 	}
 
-	Shader lightCubeShader("../../../src/shaders/lightCbue.vert", nullptr, nullptr, nullptr, "../../../src/shaders/lightCube.frag");
 
 	float vertices[] = {
 		// positions          // normals           // texture coords
@@ -362,7 +379,6 @@ void TrainView::draw()
 	};
 	// positions of the point lights
 	glm::vec3 pointLightPositions[] = {
-		glm::vec3(0.7f,  0.2f,  2.0f),
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
 		glm::vec3(0.0f,  0.0f, -3.0f)
@@ -372,7 +388,7 @@ void TrainView::draw()
 	dirLight.direction = glm::vec3(-0.2f, -0.1f, -0.3f);
 	dirLight.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
 	dirLight.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
-	dirLight.specular = glm::vec3(0.5f, 0.5f, 0.5f);
+	dirLight.specular = glm::vec3(0.1f, 0.1f, 0.1f);
 
 	BoxShader::PointLight pointLights[4];
 	pointLights[0].position = pointLightPositions[0];
@@ -399,21 +415,13 @@ void TrainView::draw()
 	pointLights[2].linear = 0.09;
 	pointLights[2].quadratic = 0.032;
 
-	pointLights[3].position = pointLightPositions[3];
-	pointLights[3].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	pointLights[3].diffuse = glm::vec3(.8f, .8f, .8f);
-	pointLights[3].specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLights[3].constant = 1.0f;
-	pointLights[3].linear = 0.09;
-	pointLights[3].quadratic = 0.032;
-
 	glm::vec3 spotLightPos(1.2f, 1.0f, 2.0f);
 	BoxShader::SpotLight spotLight;
 	spotLight.position = spotLightPos;
 	spotLight.direction = glm::vec3(glm::normalize(pointLightPositions[0] - spotLightPos));
 	spotLight.ambient = glm::vec3(.0f, .0f, .0f);
-	spotLight.diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
-	spotLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+	spotLight.diffuse = glm::vec3(.0f, .8f, .0f);
+	spotLight.specular = glm::vec3(.9f, .0f, .0f);
 	spotLight.constant = 1.0f;
 	spotLight.linear = 0.09;
 	spotLight.quadratic = 0.032;
@@ -427,6 +435,15 @@ void TrainView::draw()
 	{ 
 		boxShader.Draw(cubePositions[i], 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
 	}
+
+	lightCubeShader.Use(viewPos);
+	for (int i = 0; i < 3; i++)
+	{
+		lightCubeShader.Draw(pointLightPositions[i]);
+	}
+	lightCubeShader.Draw(spotLightPos);
+
+	modelShader.Draw(viewPos);
 }
 
 //************************************************************************
