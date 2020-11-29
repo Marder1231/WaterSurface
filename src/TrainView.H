@@ -68,12 +68,8 @@ class CTrack;
 
 #include "../build/Model.h"
 
-class BoxShader
+namespace LightingShader
 {
-public:
-	Texture2D* DiffuseMap = nullptr;
-	Texture2D* SpecularMap = nullptr;
-	
 	struct DirLight
 	{
 		glm::vec3 direction;
@@ -96,7 +92,7 @@ public:
 		glm::vec3 specular;
 	};
 
-	struct SpotLight 
+	struct SpotLight
 	{
 		glm::vec3 position;
 		glm::vec3 direction;
@@ -111,7 +107,14 @@ public:
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 	};
+}
 
+class BoxShader
+{
+public:
+	Texture2D* DiffuseMap = nullptr;
+	Texture2D* SpecularMap = nullptr;
+	
 	Shader* shader = nullptr;
 
 	VAO Vao;
@@ -191,9 +194,15 @@ public:
 	void SetTexture(const GLchar* diffuse, const GLchar* specular)
 	{
 		if (DiffuseMap != nullptr)
+		{
 			delete DiffuseMap;
+			DiffuseMap = nullptr;
+		}
 		if (SpecularMap != nullptr)
+		{
 			delete SpecularMap;
+			SpecularMap = nullptr;
+		}
 
 		DiffuseMap = new Texture2D(diffuse);
 		SpecularMap = new Texture2D(specular);
@@ -209,7 +218,7 @@ public:
 	}
 
 	void Use(glm::vec3 viewPos, 
-	/*environment attribute*/ DirLight dirL, PointLight pointL[4], SpotLight spotL)
+	/*environment attribute*/ LightingShader::DirLight dirL, LightingShader::PointLight pointL[4], LightingShader::SpotLight spotL)
 	{
 		shader->Use();
 		shader->setVec3("viewPos", viewPos);
@@ -280,12 +289,11 @@ public:
 
 		DiffuseMap->bind(0);
 		SpecularMap->bind(1);
-
-		glBindVertexArray(this->Vao.vao);
 	}
 
 	void Draw(/*object attribute*/glm::vec3 objectPosition, GLfloat angle, glm::vec3 rotateAxis)
 	{
+		glBindVertexArray(this->Vao.vao);
 		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, objectPosition);
@@ -293,6 +301,119 @@ public:
 		shader->setMat4("model", model);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
+
+class WaveShader
+{
+public:
+	Shader* shader = nullptr;
+	VAO Vao;
+
+	Texture2D* DiffuseMap = nullptr;
+
+	WaveShader() { }
+
+	~WaveShader()
+	{ 
+		delete shader; 
+	}
+
+	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
+	{
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
+	void SetVAO()
+	{
+		float vertices[] = {
+			// positions          // normals          
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  1.0f
+		};
+
+		glGenVertexArrays(1, &this->Vao.vao);
+		glGenBuffers(1, this->Vao.vbo);
+
+		glBindVertexArray(this->Vao.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+	}
+
+	void SetTexture(const GLchar* diffuse)
+	{
+		if (DiffuseMap != nullptr)
+		{
+			delete DiffuseMap;
+			DiffuseMap = nullptr;
+		}
+
+		DiffuseMap = new Texture2D(diffuse);
+	}
+
+	/// <summary>
+	/// setting material which is never change
+	/// </summary>
+	void Init()
+	{
+		shader->setInt("material.diffuse", 0);
+		shader->setInt("material.specular", 1);
+	}
+
+	void Use(glm::vec3 viewPos,
+		/*environment attribute*/ LightingShader::DirLight dirL, LightingShader::PointLight pointL)
+	{
+		shader->Use();
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		//directional light
+		shader->setVec3("dirLight.direction", dirL.direction);
+		shader->setVec3("dirLight.ambient", dirL.ambient);
+		shader->setVec3("dirLight.diffuse", dirL.diffuse);
+		shader->setVec3("dirLight.specular", dirL.specular);
+
+		// point light 1
+		shader->setVec3("pointLights.position", pointL.position);
+		shader->setVec3("pointLights.ambient", pointL.ambient);
+		shader->setVec3("pointLights.diffuse", pointL.diffuse);
+		shader->setVec3("pointLights.specular", pointL.specular);
+		shader->setFloat("pointLights.constant", pointL.constant);
+		shader->setFloat("pointLights.linear", pointL.linear);
+		shader->setFloat("pointLights.quadratic", pointL.quadratic);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+		 
+		DiffuseMap->bind(0);
+	}
+
+
+	void Draw(/*object attribute*/glm::vec3 objectPosition)
+	{
+		glBindVertexArray(this->Vao.vao);
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, objectPosition);
+		shader->setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 };
 
@@ -498,4 +619,10 @@ class TrainView : public Fl_Gl_Window
 		LightCubeShader lightCubeShader;
 
 		ModelShader modelShader;
+
+		WaveShader waveShader;
+
+		float waveHeight[64][64];
+		glm::vec4 wavePoint[6 * 64 * 64];
+		float timer = 0;
 };

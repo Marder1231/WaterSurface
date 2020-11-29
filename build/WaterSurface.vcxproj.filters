@@ -83,6 +83,18 @@
     <None Include="model.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\wave.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\wave.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\waveTest.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\waveTest.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

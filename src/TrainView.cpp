@@ -199,6 +199,16 @@ void TrainView::draw()
 			boxShader.Init();
 		}
 
+		if (waveShader.shader == nullptr)
+		{
+			waveShader.SetShader("../src/shaders/wave.vert"
+				, nullptr, nullptr, nullptr
+				, "../src/shaders/wave.frag");
+			waveShader.SetVAO();
+			waveShader.SetTexture("../Images/Wave.png");
+			waveShader.Init();
+		}
+
 		if (lightCubeShader.shader == nullptr)
 		{
 			lightCubeShader.SetShader("../src/shaders/lightCbue.vert"
@@ -208,11 +218,11 @@ void TrainView::draw()
 			lightCubeShader.Init();
 		}
 
-		if (modelShader.shader == nullptr)
-		{
-			modelShader.SetShader("../src/shaders/model.vert", nullptr, nullptr, nullptr, "../src/shaders/model.frag");
-			modelShader.SetModel("../Model/nanosuit/nanosuit.obj");
-		}
+		//if (modelShader.shader == nullptr)
+		//{
+		//	modelShader.SetShader("../src/shaders/model.vert", nullptr, nullptr, nullptr, "../src/shaders/model.frag");
+		//	modelShader.SetModel("../Model/nanosuit/nanosuit.obj");
+		//}
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -318,52 +328,6 @@ void TrainView::draw()
 		drawStuff(true);
 		unsetupShadows();
 	}
-
-
-	float vertices[] = {
-		// positions          // normals           // texture coords
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-		 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-	};
 	// positions all containers
 	glm::vec3 cubePositions[] = {
 		glm::vec3(0.0f,  0.0f,  0.0f),
@@ -381,16 +345,16 @@ void TrainView::draw()
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  0.0f, -3.0f)
+		glm::vec3(0.0f,  5, 0)
 	};
 
-	BoxShader::DirLight dirLight;
+	LightingShader::DirLight dirLight;
 	dirLight.direction = glm::vec3(-0.2f, -0.1f, -0.3f);
-	dirLight.ambient = glm::vec3(0.05f, 0.05f, 0.05f);
+	dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
 	dirLight.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
 	dirLight.specular = glm::vec3(0.1f, 0.1f, 0.1f);
 
-	BoxShader::PointLight pointLights[4];
+	LightingShader::PointLight pointLights[4];
 	pointLights[0].position = pointLightPositions[0];
 	pointLights[0].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
 	pointLights[0].diffuse = glm::vec3(.8f, .8f, .8f);
@@ -416,7 +380,7 @@ void TrainView::draw()
 	pointLights[2].quadratic = 0.032;
 
 	glm::vec3 spotLightPos(1.2f, 1.0f, 2.0f);
-	BoxShader::SpotLight spotLight;
+	LightingShader::SpotLight spotLight;
 	spotLight.position = spotLightPos;
 	spotLight.direction = glm::vec3(glm::normalize(pointLightPositions[0] - spotLightPos));
 	spotLight.ambient = glm::vec3(.0f, .0f, .0f);
@@ -425,25 +389,37 @@ void TrainView::draw()
 	spotLight.constant = 1.0f;
 	spotLight.linear = 0.09;
 	spotLight.quadratic = 0.032;
-	spotLight.cutOff= 12.5f;
-	spotLight.outerCutOff= 15.0f;
+	spotLight.cutOff = 12.5f;
+	spotLight.outerCutOff = 15.0f;
 
 	glm::vec3 viewPos = glm::vec3(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
-	boxShader.Use(viewPos, dirLight, pointLights, spotLight);
 	
-	for(size_t i = 0; i < 10; i++)
-	{ 
-		boxShader.Draw(cubePositions[i], 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
-	}
 
-	lightCubeShader.Use(viewPos);
-	for (int i = 0; i < 3; i++)
+	waveShader.Use(viewPos, dirLight, pointLights[2]);
+
+	for (int x = -5; x <= 5; x++)
 	{
-		lightCubeShader.Draw(pointLightPositions[i]);
+		for (int z = -5; z <= 5; z++)
+		{
+			waveShader.Draw(glm::vec3(x, 0, z));
+		}
 	}
-	lightCubeShader.Draw(spotLightPos);
+	//boxShader.Use(viewPos, dirLight, pointLights, spotLight);
 
-	modelShader.Draw(viewPos);
+	//for (size_t i = 0; i < 10; i++)
+	//{
+	//	boxShader.Draw(cubePositions[i], 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
+	//}
+
+	//lightCubeShader.Use(viewPos);
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	lightCubeShader.Draw(pointLightPositions[i]);
+	//}
+	//lightCubeShader.Draw(spotLightPos);
+
+	//modelShader.Draw(viewPos);
+
 }
 
 //************************************************************************
