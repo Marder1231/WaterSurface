@@ -27,6 +27,7 @@ struct PointLight {
     vec3 specular;
 };
 
+#define NR_POINT_LIGHTS 4
 
 in vec3 FragPos;
 in vec3 Normal;
@@ -37,8 +38,10 @@ uniform DirLight dirLight;
 uniform PointLight pointLights;
 uniform Material material;
 
+// function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
+
 void main()
 {    
     // properties
@@ -52,10 +55,10 @@ void main()
     // this fragment's final color.
     // == =====================================================
     // phase 1: directional lighting
-
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
+    // phase 2: point lights
     result += CalcPointLight(pointLights, norm, FragPos, viewDir);    
-
+    
     FragColor = vec4(result, 1.0);
 }
 

@@ -189,15 +189,15 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 
-		if (boxShader.shader == nullptr)
-		{
-			boxShader.SetShader("../src/shaders/colors.vert"
-				, nullptr, nullptr, nullptr
-				, "../src/shaders/color.frag");
-			boxShader.SetVAO();
-			boxShader.SetTexture("../Images/container2.png", "../Images/specular.png");
-			boxShader.Init();
-		}
+		//if (boxShader.shader == nullptr)
+		//{
+		//	boxShader.SetShader("../src/shaders/colors.vert"
+		//		, nullptr, nullptr, nullptr
+		//		, "../src/shaders/color.frag");
+		//	boxShader.SetVAO();
+		//	boxShader.SetTexture("../Images/container2.png", "../Images/specular.png");
+		//	boxShader.Init();
+		//}
 
 		if (waveShader.shader == nullptr)
 		{
@@ -216,6 +216,31 @@ void TrainView::draw()
 				, "../src/shaders/lightCube.frag");
 			lightCubeShader.SetVAO();
 			lightCubeShader.Init();
+		}
+
+		if (heightWaveShader.shader == nullptr)
+		{
+			heightWaveShader.SetShader("../src/shaders/HeightWave.vert",
+										nullptr, nullptr, nullptr,
+										"../src/shaders/HeightWave.frag");
+			heightWaveShader.SetVAO();
+			heightWaveShader.Init();
+
+			for (int i = 0; i < 200; i++)
+			{
+				std::string path = "../Images/waves5/";
+				std::string pictureCoutner = "";
+				if (i < 10)
+				{
+					pictureCoutner = "00";
+				}
+				else if (i < 100)
+					pictureCoutner = "0";
+
+				pictureCoutner += std::to_string(i);
+				std::string png = ".png";
+				heightWaveShader.heigthMap[i].LoadTexture((path + pictureCoutner + png).c_str());
+			}
 		}
 
 		//if (modelShader.shader == nullptr)
@@ -345,14 +370,14 @@ void TrainView::draw()
 	glm::vec3 pointLightPositions[] = {
 		glm::vec3(2.3f, -3.3f, -4.0f),
 		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  5, 0)
+		glm::vec3(0.0f,  1, 0)
 	};
 
 	LightingShader::DirLight dirLight;
-	dirLight.direction = glm::vec3(-0.2f, -0.1f, -0.3f);
-	dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-	dirLight.diffuse = glm::vec3(0.4f, 0.4f, 0.4f);
-	dirLight.specular = glm::vec3(0.1f, 0.1f, 0.1f);
+	dirLight.direction = glm::vec3(-.2f, -1.0f, -0.3f);
+	dirLight.ambient = glm::vec3(.05f, .05f, .05f);
+	dirLight.diffuse = glm::vec3(.4f, .4f, .4f);
+	dirLight.specular = glm::vec3(.5f, .5f, .5f);
 
 	LightingShader::PointLight pointLights[4];
 	pointLights[0].position = pointLightPositions[0];
@@ -373,7 +398,7 @@ void TrainView::draw()
 
 	pointLights[2].position = pointLightPositions[2];
 	pointLights[2].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	pointLights[2].diffuse = glm::vec3(.8f, .8f, .8f);
+	pointLights[2].diffuse = glm::vec3(.3f, .3f, .3f);
 	pointLights[2].specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	pointLights[2].constant = 1.0f;
 	pointLights[2].linear = 0.09;
@@ -394,16 +419,30 @@ void TrainView::draw()
 
 	glm::vec3 viewPos = glm::vec3(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
 	
+	
+	//testShader.Draw(timer);
 
-	waveShader.Use(viewPos, dirLight, pointLights[2]);
+	waveShader.Use(viewPos, dirLight, pointLights[2], tw->speed->value());
 
+	for (int x = -20; x <= 20; x++)
+	{
+		for (int z = -20; z <= 20; z++)
+		{
+			waveShader.Draw(glm::vec3(x, 1, z), this->timer);
+		}
+	}
+
+
+
+	heightWaveShader.Use(viewPos, dirLight, pointLights[2]);
 	for (int x = -5; x <= 5; x++)
 	{
 		for (int z = -5; z <= 5; z++)
 		{
-			waveShader.Draw(glm::vec3(x, 0, z));
+			heightWaveShader.Draw(glm::vec3(x, 5, z), this->timer);
 		}
 	}
+
 	//boxShader.Use(viewPos, dirLight, pointLights, spotLight);
 
 	//for (size_t i = 0; i < 10; i++)
@@ -411,15 +450,13 @@ void TrainView::draw()
 	//	boxShader.Draw(cubePositions[i], 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
 	//}
 
-	//lightCubeShader.Use(viewPos);
+	lightCubeShader.Use(viewPos);
+	lightCubeShader.Draw(pointLightPositions[2]);
 	//for (int i = 0; i < 3; i++)
 	//{
 	//	lightCubeShader.Draw(pointLightPositions[i]);
 	//}
 	//lightCubeShader.Draw(spotLightPos);
-
-	//modelShader.Draw(viewPos);
-
 }
 
 //************************************************************************

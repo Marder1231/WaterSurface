@@ -68,6 +68,8 @@ class CTrack;
 
 #include "../build/Model.h"
 
+const int waveClip = 64;
+
 namespace LightingShader
 {
 	struct DirLight
@@ -326,15 +328,45 @@ public:
 
 	void SetVAO()
 	{
-		float vertices[] = {
-			// positions          // normals          
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f,  1.0f
-		};
+		float vertices[6][5];
+
+		int index = 0;
+		vertices[index][0] = (float)0;
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)0;
+		vertices[index][3] = 0;
+		vertices[index][4] = 1;
+		index++;
+		vertices[index][0] = (float)0;
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 1;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 0);
+		vertices[index][3] = 0;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 0);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 0) ;
+		vertices[index][3] = 0;
+		vertices[index][4] = 1;
+		index++;
 
 		glGenVertexArrays(1, &this->Vao.vao);
 		glGenBuffers(1, this->Vao.vbo);
@@ -343,13 +375,10 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
-		glEnableVertexAttribArray(2);
-
 	}
 
 	void SetTexture(const GLchar* diffuse)
@@ -369,6 +398,131 @@ public:
 	void Init()
 	{
 		shader->setInt("material.diffuse", 0);
+		shader->setInt("material.specular", 1);
+	}
+
+	void Use(glm::vec3 viewPos,
+		/*environment attribute*/ LightingShader::DirLight dirL, LightingShader::PointLight pointL, float waveLength)
+	{
+		shader->Use();
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+		//directional light
+		shader->setVec3("dirLight.direction", dirL.direction);
+		shader->setVec3("dirLight.ambient", dirL.ambient);
+		shader->setVec3("dirLight.diffuse", dirL.diffuse);
+		shader->setVec3("dirLight.specular", dirL.specular);
+
+		// point light 1
+		shader->setVec3("pointLights.position", pointL.position);
+		shader->setVec3("pointLights.ambient", pointL.ambient);
+		shader->setVec3("pointLights.diffuse", pointL.diffuse);
+		shader->setVec3("pointLights.specular", pointL.specular);
+		shader->setFloat("pointLights.constant", pointL.constant);
+		shader->setFloat("pointLights.linear", pointL.linear);
+		shader->setFloat("pointLights.quadratic", pointL.quadratic);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+
+		DiffuseMap->bind(0);
+	}
+
+
+	void Draw(/*object attribute*/glm::vec3 objectPosition, float time)
+	{
+		glBindVertexArray(this->Vao.vao);
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, objectPosition);
+		shader->setMat4("model", model);
+
+		shader->setFloat("time", time);
+
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+};
+
+class HeightWaveShader
+{
+public:
+	Shader* shader = nullptr;
+	VAO Vao;
+
+	Texture2D heigthMap[200];
+
+	int loadCounter = 0;
+
+	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
+	{
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
+	void SetVAO()
+	{
+		float vertices[6][5];
+
+		int index = 0;
+		vertices[index][0] = (float)0;
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)0;
+		vertices[index][3] = 0;
+		vertices[index][4] = 1;
+		index++;
+		vertices[index][0] = (float)0;
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 1;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 1);
+		vertices[index][3] = 1;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 1);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 0);
+		vertices[index][3] = 0;
+		vertices[index][4] = 0;
+		index++;
+		vertices[index][0] = (float)(0 + 0);
+		vertices[index][1] = 0;
+		vertices[index][2] = (float)(0 + 0);
+		vertices[index][3] = 0;
+		vertices[index][4] = 1;
+		index++;
+
+		glGenVertexArrays(1, &this->Vao.vao);
+		glGenBuffers(1, this->Vao.vbo);
+
+		glBindVertexArray(this->Vao.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+	
+	/// <summary>
+	/// setting material which is never change
+	/// </summary>
+	void Init()
+	{
+		shader->setInt("material.diffuse", 1);
 		shader->setInt("material.specular", 1);
 	}
 
@@ -400,18 +554,24 @@ public:
 		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
 		shader->setMat4("projection", projection);
 		shader->setMat4("view", view);
-		 
-		DiffuseMap->bind(0);
+
+
 	}
 
-
-	void Draw(/*object attribute*/glm::vec3 objectPosition)
+	void Draw(glm::vec3 objectPosition, float time)
 	{
+		heigthMap[0].bind(0);
+
+		loadCounter++;
+		loadCounter %= 200;
+
 		glBindVertexArray(this->Vao.vao);
 		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, objectPosition);
 		shader->setMat4("model", model);
+
+		shader->setFloat("time", time);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
@@ -518,6 +678,7 @@ public:
 		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, objectPosition);
+		model = glm::scale(model, glm::vec3(.1f, .1f, .1f));
 		shader->setMat4("model", model);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -593,8 +754,6 @@ class TrainView : public Fl_Gl_Window
 
 		//set ubo
 		void setUBO();
-
-		int LoadTexture(const char* path);
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
@@ -622,7 +781,9 @@ class TrainView : public Fl_Gl_Window
 
 		WaveShader waveShader;
 
-		float waveHeight[64][64];
-		glm::vec4 wavePoint[6 * 64 * 64];
+		HeightWaveShader heightWaveShader;
+
+		float waveHeight[waveClip][waveClip];
+		glm::vec4 wavePoint[6 * waveClip * waveClip];
 		float timer = 0;
 };

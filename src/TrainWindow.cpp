@@ -197,7 +197,7 @@ advanceTrain(float dir)
 {
 	//#####################################################################
 	// TODO: make this work for your train
-	trainView->timer += 1;
+	trainView->timer += .1;
 
 	//#####################################################################
 #ifdef EXAMPLE_SOLUTION

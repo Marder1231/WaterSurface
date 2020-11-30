@@ -95,6 +95,12 @@
     <None Include="..\src\shaders\waveTest.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\HeightWave.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\HeightWave.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
