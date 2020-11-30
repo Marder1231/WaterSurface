@@ -199,15 +199,15 @@ void TrainView::draw()
 		//	boxShader.Init();
 		//}
 
-		if (waveShader.shader == nullptr)
-		{
-			waveShader.SetShader("../src/shaders/wave.vert"
-				, nullptr, nullptr, nullptr
-				, "../src/shaders/wave.frag");
-			waveShader.SetVAO();
-			waveShader.SetTexture("../Images/Wave.png");
-			waveShader.Init();
-		}
+		//if (waveShader.shader == nullptr)
+		//{
+		//	waveShader.SetShader("../src/shaders/wave.vert"
+		//		, nullptr, nullptr, nullptr
+		//		, "../src/shaders/wave.frag");
+		//	waveShader.SetVAO();
+		//	waveShader.SetTexture("../Images/Wave.png");
+		//	waveShader.Init();
+		//}
 
 		if (lightCubeShader.shader == nullptr)
 		{
@@ -218,28 +218,25 @@ void TrainView::draw()
 			lightCubeShader.Init();
 		}
 
-		if (heightWaveShader.shader == nullptr)
+		if (heightMapShader.shader == nullptr)
 		{
-			heightWaveShader.SetShader("../src/shaders/HeightWave.vert",
-										nullptr, nullptr, nullptr,
-										"../src/shaders/HeightWave.frag");
-			heightWaveShader.SetVAO();
-			heightWaveShader.Init();
+			heightMapShader.SetShader("../src/shaders/HeightWave.vert",
+				nullptr, nullptr, nullptr,
+				"../src/shaders/HeightWave.frag");
+
+			heightMapShader.SetVAO();
 
 			for (int i = 0; i < 200; i++)
 			{
 				std::string path = "../Images/waves5/";
-				std::string pictureCoutner = "";
+				std::string pickPicture = "";
 				if (i < 10)
-				{
-					pictureCoutner = "00";
-				}
+					pickPicture = "00";
 				else if (i < 100)
-					pictureCoutner = "0";
-
-				pictureCoutner += std::to_string(i);
+					pickPicture = "0";
+				pickPicture += std::to_string(i);
 				std::string png = ".png";
-				heightWaveShader.heigthMap[i].LoadTexture((path + pictureCoutner + png).c_str());
+				heightMapShader.HeightMaps[i] = new Texture2D((path + pickPicture + png).c_str());
 			}
 		}
 
@@ -422,26 +419,17 @@ void TrainView::draw()
 	
 	//testShader.Draw(timer);
 
-	waveShader.Use(viewPos, dirLight, pointLights[2], tw->speed->value());
+	heightMapShader.Use(viewPos, dirLight, pointLights[2]);
+	heightMapShader.Draw(glm::vec3(0, 0, 0));
+	//waveShader.Use(viewPos, dirLight, pointLights[2], tw->speed->value());
 
-	for (int x = -20; x <= 20; x++)
-	{
-		for (int z = -20; z <= 20; z++)
-		{
-			waveShader.Draw(glm::vec3(x, 1, z), this->timer);
-		}
-	}
-
-
-
-	heightWaveShader.Use(viewPos, dirLight, pointLights[2]);
-	for (int x = -5; x <= 5; x++)
-	{
-		for (int z = -5; z <= 5; z++)
-		{
-			heightWaveShader.Draw(glm::vec3(x, 5, z), this->timer);
-		}
-	}
+	//for (int x = -20; x <= 20; x++)
+	//{
+	//	for (int z = -20; z <= 20; z++)
+	//	{
+	//		waveShader.Draw(glm::vec3(x, 1, z), this->timer);
+	//	}
+	//}
 
 	//boxShader.Use(viewPos, dirLight, pointLights, spotLight);
 
