@@ -39,6 +39,8 @@
 // we need to know what is in the world to show
 #include "Track.H"
 
+#include "../src/GameObject/GameObject.h"
+
 // other things we just deal with as pointers, to avoid circular references
 class TrainView;
 
@@ -73,23 +75,12 @@ class TrainWindow : public Fl_Double_Window {
 
 		Fl_Group*			widgets;	// all widgets, grouped for resizing ease
 
-		// utility buttons
-		Fl_Button*			resetButton;
-
-		// which viewpoint are we drawing from
-		Fl_Button*			worldCam;
-		Fl_Button*			trainCam;
-		Fl_Button*			topCam;
-
-		// the type of the spline (use its value to determine)
-		Fl_Browser*			splineBrowser;
-
 		// are we animating the train?
 		Fl_Button*			runButton;
-		// if we're animating it, how fast should it go?
-		Fl_Value_Slider*	speed;
-		Fl_Button*			arcLength;		// do we use arc length for speed?
 
+
+		void AddLightBrowser(Lighting::BaseLight& _light);
+		Fl_Browser* LightList;
 
 
 		// we have other widgets as part of the sample solution

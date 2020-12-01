@@ -7,6 +7,7 @@ struct Material {
     float shininess;
 }; 
 
+
 struct DirLight {
     vec3 direction;
 	
@@ -27,19 +28,20 @@ struct PointLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 3
+#define NR_DIR_LIGHTS 1
+#define NR_SPOT_LIGHTS 1
 
 in vec3 FragPos;
 
 uniform vec3 viewPos;
-uniform DirLight dirLight;
-uniform PointLight pointLights;
+uniform DirLight dirLight[NR_DIR_LIGHTS];
+uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform Material material;
 
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-
 void main()
 {    
     // properties
@@ -53,14 +55,16 @@ void main()
     // this fragment's final color.
     // == =====================================================
     // phase 1: directional lighting
-    vec3 result = CalcDirLight(dirLight, norm, viewDir);
-    // phase 2: point lights
-    result += CalcPointLight(pointLights, norm, FragPos, viewDir);    
-    
+    vec3 result = CalcDirLight(dirLight[0], norm, viewDir);
+    for(int i = 0; i < NR_POINT_LIGHTS; i++)
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);    
+
     FragColor = vec4(result, 1.0);
 }
 
 // calculates the color when using a directional light.
+
+// calculates the color when using a point light.
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
 {
     vec3 lightDir = normalize(-light.direction);

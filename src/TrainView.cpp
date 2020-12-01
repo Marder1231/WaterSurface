@@ -88,9 +88,9 @@ int TrainView::handle(int event)
 	// see if the ArcBall will handle the event - if it does, 
 	// then we're done
 	// note: the arcball only gets the event if we're in world view
-	if (tw->worldCam->value())
-		if (arcball.handle(event)) 
-			return 1;
+
+	if (arcball.handle(event)) 
+		return 1;
 
 	// remember what button was used
 	static int last_push;
@@ -199,33 +199,75 @@ void TrainView::draw()
 		//	boxShader.Init();
 		//}
 
-		//if (waveShader.shader == nullptr)
-		//{
-		//	waveShader.SetShader("../src/shaders/wave.vert"
-		//		, nullptr, nullptr, nullptr
-		//		, "../src/shaders/wave.frag");
-		//	waveShader.SetVAO();
-		//	waveShader.SetTexture("../Images/Wave.png");
-		//	waveShader.Init();
-		//}
-
-		if (lightCubeShader.shader == nullptr)
-		{
-			lightCubeShader.SetShader("../src/shaders/lightCbue.vert"
-				, nullptr, nullptr, nullptr
-				, "../src/shaders/lightCube.frag");
-			lightCubeShader.SetVAO();
-			lightCubeShader.Init();
-		}
-
 		if (heightMapShader.shader == nullptr)
 		{
+			// positions of the point lights
+			glm::vec3 pointLightPositions[] = {
+				glm::vec3(2.3f, -3.3f, -4.0f),
+				glm::vec3(-4.0f,  2.0f, -12.0f),
+				glm::vec3(0.0f,  1, 0)
+			};
+
+			Environment* instance = Environment::GetInstance();
+
+			Lighting::DirLight* dirLight = new Lighting::DirLight;
+			dirLight->SetDirection(glm::vec3(-.2f, -1.0f, -0.3f));
+			dirLight->SetAmbient(glm::vec3(.05f, .05f, .05f));
+			dirLight->SetDiffuse(glm::vec3(.4f, .4f, .4f));
+			dirLight->SetSpecular(glm::vec3(.5f, .5f, .5f));
+
+			instance->lights.AddLight(dirLight);
+
+			Lighting::PointLight* pointLights[3];
+			pointLights[0] = new Lighting::PointLight();
+			pointLights[0]->SetPosition(pointLightPositions[0]);
+			pointLights[0]->SetAmbient(glm::vec3(0.05f, 0.05f, 0.05f));
+			pointLights[0]->SetDiffuse(glm::vec3(.8f, .8f, .8f));
+			pointLights[0]->SetSpecular(glm::vec3(1.0f, 1.0f, 1.0f));
+			pointLights[0]->SetConstant(1.0f);
+			pointLights[0]->SetLinear(0.09);
+			pointLights[0]->SetQuadratic(0.032);
+
+			pointLights[1] = new Lighting::PointLight();
+			pointLights[1]->SetPosition(pointLightPositions[1]);
+			pointLights[1]->SetAmbient(glm::vec3(0.05f, 0.05f, 0.05f));
+			pointLights[1]->SetDiffuse(glm::vec3(.8f, .8f, .8f));
+			pointLights[1]->SetSpecular(glm::vec3(1.0f, 1.0f, 1.0f));
+			pointLights[1]->SetConstant(1.0f);
+			pointLights[1]->SetLinear(0.09);
+			pointLights[1]->SetQuadratic(0.032);
+
+			pointLights[2] = new Lighting::PointLight();
+			pointLights[2]->SetPosition(pointLightPositions[2]);
+			pointLights[2]->SetAmbient(glm::vec3(0.05f, 0.05f, 0.05f));
+			pointLights[2]->SetDiffuse(glm::vec3(.4f, .4f, .4f));
+			pointLights[2]->SetSpecular(glm::vec3(1.0f, 1.0f, 1.0f));
+			pointLights[2]->SetConstant(1.0f);
+			pointLights[2]->SetLinear(0.09);
+			pointLights[2]->SetQuadratic(0.032);
+
+			instance->lights.AddLight(pointLights[0]);
+			instance->lights.AddLight(pointLights[1]);
+			instance->lights.AddLight(pointLights[2]);
+
+			glm::vec3 spotLightPos(1.2f, 1.0f, 2.0f);
+			Lighting::SpotLight* spotLight = new Lighting::SpotLight();
+			spotLight->SetPosition(spotLightPos);
+			spotLight->SetDirection(glm::vec3(glm::normalize(pointLightPositions[0] - spotLightPos)));
+			spotLight->SetAmbient(glm::vec3(.0f, .0f, .0f));
+			spotLight->SetDiffuse(glm::vec3(.0f, .8f, .0f));
+			spotLight->SetSpecular(glm::vec3(.9f, .0f, .0f));
+			spotLight->SetConstant(1.0f);
+			spotLight->SetLinear(0.09);
+			spotLight->SetQuadratic(0.032);
+			spotLight->SetCutOff(12.5f);
+			spotLight->SetOuterCutOff(15.0f);
+			instance->lights.AddLight(spotLight);
+
 			heightMapShader.SetShader("../src/shaders/HeightWave.vert",
 				nullptr, nullptr, nullptr,
 				"../src/shaders/HeightWave.frag");
-
-			heightMapShader.SetVAO();
-
+			heightMapShader.SetVao();
 			for (int i = 0; i < 200; i++)
 			{
 				std::string path = "../Images/waves5/";
@@ -236,9 +278,40 @@ void TrainView::draw()
 					pickPicture = "0";
 				pickPicture += std::to_string(i);
 				std::string png = ".png";
-				heightMapShader.HeightMaps[i] = new Texture2D((path + pickPicture + png).c_str());
+				heightMapShader.AddTexture((path + pickPicture + png).c_str());
 			}
 		}
+
+		if (lightCubeShader.shader == nullptr)
+		{
+			lightCubeShader.SetShader("../src/shaders/lightCbue.vert"
+				, nullptr, nullptr, nullptr
+				, "../src/shaders/lightCube.frag");
+			lightCubeShader.SetVAO();
+			lightCubeShader.Init();
+		}
+
+		//if (heightMapShader.shader == nullptr)
+		//{
+		//	heightMapShader.SetShader("../src/shaders/HeightWave.vert",
+		//		nullptr, nullptr, nullptr,
+		//		"../src/shaders/HeightWave.frag");
+
+		//	heightMapShader.SetVAO();
+
+		//	for (int i = 0; i < 200; i++)
+		//	{
+		//		std::string path = "../Images/waves5/";
+		//		std::string pickPicture = "";
+		//		if (i < 10)
+		//			pickPicture = "00";
+		//		else if (i < 100)
+		//			pickPicture = "0";
+		//		pickPicture += std::to_string(i);
+		//		std::string png = ".png";
+		//		heightMapShader.HeightMaps[i] = new Texture2D((path + pickPicture + png).c_str());
+		//	}
+		//}
 
 		//if (modelShader.shader == nullptr)
 		//{
@@ -279,14 +352,6 @@ void TrainView::draw()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	
-	// top view only needs one light
-	if (tw->topCam->value()) {
-		glDisable(GL_LIGHT1);
-		glDisable(GL_LIGHT2);
-	} else {
-		glEnable(GL_LIGHT1);
-		glEnable(GL_LIGHT2);
-	}
 
 	//*********************************************************************
 	//
@@ -342,157 +407,16 @@ void TrainView::draw()
 	glEnable(GL_LIGHTING);
 	setupObjects();
 
-	drawStuff();
-
-	// this time drawing is for shadows (except for top view)
-	if (!tw->topCam->value()) {
-		setupShadows();
-		drawStuff(true);
-		unsetupShadows();
-	}
-	// positions all containers
-	glm::vec3 cubePositions[] = {
-		glm::vec3(0.0f,  0.0f,  0.0f),
-		glm::vec3(2.0f,  5.0f, -15.0f),
-		glm::vec3(-1.5f, -2.2f, -2.5f),
-		glm::vec3(-3.8f, -2.0f, -12.3f),
-		glm::vec3(2.4f, -0.4f, -3.5f),
-		glm::vec3(-1.7f,  3.0f, -7.5f),
-		glm::vec3(1.3f, -2.0f, -2.5f),
-		glm::vec3(1.5f,  2.0f, -2.5f),
-		glm::vec3(1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
-	};
-	// positions of the point lights
-	glm::vec3 pointLightPositions[] = {
-		glm::vec3(2.3f, -3.3f, -4.0f),
-		glm::vec3(-4.0f,  2.0f, -12.0f),
-		glm::vec3(0.0f,  1, 0)
-	};
-
-	LightingShader::DirLight dirLight;
-	dirLight.direction = glm::vec3(-.2f, -1.0f, -0.3f);
-	dirLight.ambient = glm::vec3(.05f, .05f, .05f);
-	dirLight.diffuse = glm::vec3(.4f, .4f, .4f);
-	dirLight.specular = glm::vec3(.5f, .5f, .5f);
-
-	LightingShader::PointLight pointLights[4];
-	pointLights[0].position = pointLightPositions[0];
-	pointLights[0].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	pointLights[0].diffuse = glm::vec3(.8f, .8f, .8f);
-	pointLights[0].specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLights[0].constant = 1.0f;
-	pointLights[0].linear = 0.09;
-	pointLights[0].quadratic = 0.032;
-
-	pointLights[1].position = pointLightPositions[1];
-	pointLights[1].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	pointLights[1].diffuse = glm::vec3(.8f, .8f, .8f);
-	pointLights[1].specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLights[1].constant = 1.0f;
-	pointLights[1].linear = 0.09;
-	pointLights[1].quadratic = 0.032;
-
-	pointLights[2].position = pointLightPositions[2];
-	pointLights[2].ambient = glm::vec3(0.05f, 0.05f, 0.05f);
-	pointLights[2].diffuse = glm::vec3(.3f, .3f, .3f);
-	pointLights[2].specular = glm::vec3(1.0f, 1.0f, 1.0f);
-	pointLights[2].constant = 1.0f;
-	pointLights[2].linear = 0.09;
-	pointLights[2].quadratic = 0.032;
-
-	glm::vec3 spotLightPos(1.2f, 1.0f, 2.0f);
-	LightingShader::SpotLight spotLight;
-	spotLight.position = spotLightPos;
-	spotLight.direction = glm::vec3(glm::normalize(pointLightPositions[0] - spotLightPos));
-	spotLight.ambient = glm::vec3(.0f, .0f, .0f);
-	spotLight.diffuse = glm::vec3(.0f, .8f, .0f);
-	spotLight.specular = glm::vec3(.9f, .0f, .0f);
-	spotLight.constant = 1.0f;
-	spotLight.linear = 0.09;
-	spotLight.quadratic = 0.032;
-	spotLight.cutOff = 12.5f;
-	spotLight.outerCutOff = 15.0f;
-
 	glm::vec3 viewPos = glm::vec3(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
-	
 	
 	//testShader.Draw(timer);
 
-	heightMapShader.Use(viewPos, dirLight, pointLights[2]);
-	heightMapShader.Draw(glm::vec3(0, 0, 0));
-	//waveShader.Use(viewPos, dirLight, pointLights[2], tw->speed->value());
+	heightMapShader.Use(viewPos);
+	HeightWave.Draw(&heightMapShader);
 
-	//for (int x = -20; x <= 20; x++)
-	//{
-	//	for (int z = -20; z <= 20; z++)
-	//	{
-	//		waveShader.Draw(glm::vec3(x, 1, z), this->timer);
-	//	}
-	//}
-
-	//boxShader.Use(viewPos, dirLight, pointLights, spotLight);
-
-	//for (size_t i = 0; i < 10; i++)
-	//{
-	//	boxShader.Draw(cubePositions[i], 20.0f * i, glm::vec3(1.0f, 0.3f, 0.5f));
-	//}
-
-	lightCubeShader.Use(viewPos);
-	lightCubeShader.Draw(pointLightPositions[2]);
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	lightCubeShader.Draw(pointLightPositions[i]);
-	//}
-	//lightCubeShader.Draw(spotLightPos);
-}
-
-//************************************************************************
-//
-// * This sets up both the Projection and the ModelView matrices
-//   HOWEVER: it doesn't clear the projection first (the caller handles
-//   that) - its important for picking
-//========================================================================
-void TrainView::
-setProjection()
-//========================================================================
-{
-	// Compute the aspect ratio (we'll need it)
-	float aspect = static_cast<float>(w()) / static_cast<float>(h());
-
-	// Check whether we use the world camp
-	if (tw->worldCam->value())
-		arcball.setProjection(false);
-	// Or we use the top cam
-	else if (tw->topCam->value()) {
-		float wi, he;
-		if (aspect >= 1) {
-			wi = 110;
-			he = wi / aspect;
-		} 
-		else {
-			he = 110;
-			wi = he * aspect;
-		}
-
-		// Set up the top camera drop mode to be orthogonal and set
-		// up proper projection matrix
-		glMatrixMode(GL_PROJECTION);
-		glOrtho(-wi, wi, -he, he, 200, -200);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glRotatef(-90,1,0,0);
-	} 
-	// Or do the train view or other view here
-	//####################################################################
-	// TODO: 
-	// put code for train view projection here!	
-	//####################################################################
-	else {
-#ifdef EXAMPLE_SOLUTION
-		trainCamView(this,aspect);
-#endif
-	}
+	//Lighting::PointLight* light = static_cast<Lighting::PointLight*>(Environment::GetInstance()->lights.Lightings[lightid]);
+	//lightCubeShader.Use(viewPos);
+	//lightCubeShader.Draw(light->GetPosition());
 }
 
 //************************************************************************
@@ -631,4 +555,26 @@ void TrainView::setUBO()
 	//glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection_matrix[0][0]);
 	//glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &view_matrix[0][0]);
 	//glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+//************************************************************************
+//
+// * This sets up both the Projection and the ModelView matrices
+//   HOWEVER: it doesn't clear the projection first (the caller handles
+//   that) - its important for picking
+//========================================================================
+void TrainView::
+setProjection()
+//========================================================================
+{
+	// Compute the aspect ratio (we'll need it)
+	float aspect = static_cast<float>(w()) / static_cast<float>(h());
+
+	// Check whether we use the world camp
+	arcball.setProjection(false);
+	// Or do the train view or other view here
+	//####################################################################
+	// TODO: 
+	// put code for train view projection here!	
+	//####################################################################
 }

@@ -317,7 +317,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\GameObject\GameObject.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClInclude Include="..\src\GameObject\GameObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <None Include="..\src\shaders\color.frag" />

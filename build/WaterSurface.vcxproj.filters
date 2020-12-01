@@ -28,6 +28,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>RenderUtilities</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\GameObject\GameObject.cpp">
+      <Filter>GameObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D:\Practicum\CG\WaterSurface\src\RenderUtilities\BufferObject.h">
@@ -47,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>RenderUtilities</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GameObject\GameObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +120,9 @@
     </Filter>
     <Filter Include="shaders">
       <UniqueIdentifier>{6BCC1013-F288-3243-8869-17BAC8131D23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{7ebb6e63-7e05-4e35-86af-aa49d424571b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
