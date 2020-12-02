@@ -30,7 +30,12 @@ namespace Lighting
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 	public:
-		int ID = 0;
+		/// <summary>
+		/// notice : id will setup get from environment;
+		///			 if didn't put in environment restores;
+		///			 this id is -1
+		/// </summary>
+		int ID = -1;
 		EmLightType Type = EmLightType::Base;
 
 		BaseLight() { };
@@ -122,7 +127,7 @@ namespace Lighting
 		}
 		virtual void SetDirection(glm::vec3 _direction) override
 		{
-			direction = _direction;
+			direction = glm::normalize(_direction);
 		}
 		virtual glm::vec3& GetDirection() override
 		{
@@ -210,7 +215,7 @@ namespace Lighting
 
 		virtual void SetDirection(glm::vec3 _dir) override
 		{
-			direction = _dir;
+			direction = glm::normalize(_dir);
 		}
 		virtual glm::vec3& GetDirection() override
 		{
@@ -474,10 +479,10 @@ public:
 		const int clipAmount = 1600;
 
 		float sourceVertices[] = {
-			-1000.0f ,0.0f , -1000.0f,
-			-1000.0f ,0.0f , 1000.0f ,
-			1000.0f ,0.0f ,1000.0f ,
-			1000.0f ,0.0f ,-1000.0f };
+			-100.0f ,0.0f , -100.0f,
+			-100.0f ,0.0f , 100.0f ,
+			100.0f ,0.0f ,100.0f ,
+			100.0f ,0.0f ,-100.0f };
 		GLfloat  sourceNormal[] = {
 			0.0f, 1.0f, 0.0f,
 			0.0f, 1.0f, 0.0f,

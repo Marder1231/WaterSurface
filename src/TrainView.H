@@ -256,192 +256,95 @@ public:
 	}
 };
 
-//class HeightWaveShader
+//class RayCastShader : public ObjectShader
 //{
 //public:
-//	Shader* shader = nullptr;
-//	VAO* Vao = nullptr;
+//	RayCastShader() { }
 //
-//	int Counter = 0;
-//
-//	Texture2D* HeightMaps[200] = { nullptr };
-//
-//	HeightWaveShader() { }
-//
-//	~HeightWaveShader()
+//	virtual void SetVao() override
 //	{
-//		delete shader;
-//		delete Vao;
-//		for (int i = 0; i < 200; i++)
-//		{
-//			delete HeightMaps[i];
-//		}
-//	}
+//		if (this->Vaos == nullptr)
+//			Vaos = new VAO;
 //
-//	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
-//	{
-//		shader = new Shader(vert, tesc, tese, geom, frag);
-//	}
+//		float size = 1;
 //
-//	void SetVAO()
-//	{
 //		float sourceVertices[] = {
-//			-1000.0f ,0.0f , -1000.0f,
-//			-1000.0f ,0.0f , 1000.0f ,
-//			1000.0f ,0.0f ,1000.0f ,
-//			1000.0f ,0.0f ,-1000.0f };
+//			0 ,0.0f , 0,
+//			size ,0.0f ,size  };
 //		GLuint sourceElement[] = {
-//			0, 1, 2,
-//			0, 2, 3};
+//			0, 1, 1, };
 //
-//		int length = ceil(sqrt(1600));
+//		
+//		this->Vaos->element_amount = 3;
 //
-//		std::vector<float> vertices;
-//		std::vector<float> textureCoords;
-//		std::vector<int> elements;
+//		glGenVertexArrays(1, &this->Vaos->vao);
+//		glGenBuffers(1, this->Vaos->vbo);
+//		glGenBuffers(1, &this->Vaos->ebo);
 //
-//		GLfloat VzInc = (sourceVertices[5] - sourceVertices[2]) / length;
-//		GLfloat VzStart = sourceVertices[2];
-//		GLfloat VzCurr = VzStart;
-//		GLfloat TyInc = 1.0f / length;
-//		GLfloat TyStart = 0.0f;
-//		GLfloat TyCurr = TyStart;
-//
-//		for (int i = 0; i < length; i++)
-//		{
-//			GLfloat VxInc = (sourceVertices[6] - sourceVertices[0]) / length;
-//			GLfloat VxStart = sourceVertices[0];
-//			GLfloat VxCurr = VxStart;
-//
-//			GLfloat TxInc = 1.0f / length;
-//			GLfloat TxStart = 0.0f;
-//			GLfloat TxCurr = TxStart;
-//
-//			for (int j = 0; j < length; j++)
-//			{
-//				vertices.push_back(VxCurr);
-//				vertices.push_back(sourceVertices[1]);
-//				vertices.push_back(VzCurr);
-//
-//				vertices.push_back(VxCurr);
-//				vertices.push_back(sourceVertices[4]);
-//				vertices.push_back(VzCurr + VzInc);
-//
-//				vertices.push_back(VxCurr + VxInc);
-//				vertices.push_back(sourceVertices[7]);
-//				vertices.push_back(VzCurr + VzInc);
-//
-//				vertices.push_back(VxCurr + VxInc);
-//				vertices.push_back(sourceVertices[10]);
-//				vertices.push_back(VzCurr);
-//
-//				textureCoords.push_back(TxCurr);
-//				textureCoords.push_back(TyCurr);
-//
-//				textureCoords.push_back(TxCurr);
-//				textureCoords.push_back(TyCurr + TyInc);
-//
-//				textureCoords.push_back(TxCurr + TxInc);
-//				textureCoords.push_back(TyCurr + TyInc);
-//
-//				textureCoords.push_back(TxCurr + TxInc);
-//				textureCoords.push_back(TyCurr);
-//
-//				int idx = i * length + j;
-//				elements.push_back(sourceElement[0] + (idx * 4));
-//				elements.push_back(sourceElement[1] + (idx * 4));
-//				elements.push_back(sourceElement[2] + (idx * 4));
-//
-//				elements.push_back(sourceElement[3] + (idx * 4));
-//				elements.push_back(sourceElement[4] + (idx * 4));
-//				elements.push_back(sourceElement[5] + (idx * 4));
-//
-//				VxCurr += VxInc;
-//				TxCurr += TxInc;
-//			}
-//
-//			VzCurr += VzInc;
-//			TyCurr += TyInc;
-//		}
-//
-//		this->Vao = new VAO;
-//		this->Vao->element_amount = elements.size();
-//
-//		glGenVertexArrays(1, &this->Vao->vao);
-//		glGenBuffers(2, this->Vao->vbo);
-//		glGenBuffers(1, &this->Vao->ebo);
-//
-//		glBindVertexArray(this->Vao->vao);
+//		glBindVertexArray(this->Vaos->vao);
 //
 //		// Position attribute
-//		glBindBuffer(GL_ARRAY_BUFFER, this->Vao->vbo[0]);
-//		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+//		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(sourceVertices), sourceVertices, GL_DYNAMIC_DRAW);
 //		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 //		glEnableVertexAttribArray(0);
 //
-//		// Texture Coordinate attribute
-//		glBindBuffer(GL_ARRAY_BUFFER, this->Vao->vbo[1]);
-//		glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(GLfloat), textureCoords.data(), GL_STATIC_DRAW);
-//		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-//		glEnableVertexAttribArray(1);
-//
 //		//Element attribute
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vao->ebo);
-//		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_STATIC_DRAW);
-//
+//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
+//		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sourceElement), sourceElement, GL_STATIC_DRAW);
 //	}
 //
-//	void Use(glm::vec3 viewPos,
-//		/*environment attribute*/ LightingShader::DirLight dirL, LightingShader::PointLight pointL)
+//	void SetColor(glm::vec3 color)
+//	{
+//		shader->setVec3("u_color", color);
+//	}
+//
+//	virtual void Use(glm::vec3 _) override
 //	{
 //		shader->Use();
-//		shader->setVec3("material.diffuse", .3, .5, 1);
-//		shader->setVec3("material.specular", .8, .8, 1);
-//		shader->setVec3("viewPos", viewPos);
-//		shader->setFloat("material.shininess", 32.0f);
-//		//directional light
-//		shader->setVec3("dirLight.direction", dirL.direction);
-//		shader->setVec3("dirLight.ambient", dirL.ambient);
-//		shader->setVec3("dirLight.diffuse", dirL.diffuse);
-//		shader->setVec3("dirLight.specular", dirL.specular);
-//
-//		// point light 1
-//		shader->setVec3("pointLights.position", pointL.position);
-//		shader->setVec3("pointLights.ambient", pointL.ambient);
-//		shader->setVec3("pointLights.diffuse", pointL.diffuse);
-//		shader->setVec3("pointLights.specular", pointL.specular);
-//		shader->setFloat("pointLights.constant", pointL.constant);
-//		shader->setFloat("pointLights.linear", pointL.linear);
-//		shader->setFloat("pointLights.quadratic", pointL.quadratic);
 //
 //		glm::mat4 projection;
 //		glm::mat4 view;
 //		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
 //		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
-//		shader->setMat4("projection", projection);
-//		shader->setMat4("view", view);
+//		shader->setMat4("u_projection", projection);
+//		shader->setMat4("u_view", view);
 //
-//		HeightMaps[Counter % 200]->bind(1);
+//		glBindVertexArray(this->Vaos->vao);
 //	}
 //
-//	void Draw(glm::vec3 pos)
+//	void Draw(/*object attribute*/glm::vec3 objectPosition, glm::vec3 dir)
 //	{
-//		glUniform1i(glGetUniformLocation(this->shader->ID, "heightMap"), 1);
-//		glBindVertexArray(this->Vao->vao);
+//		float size = 1;
+//		float sourceVertices[] = {
+//			0 ,0.0f , 0,
+//			size ,0.0f ,size };
+//
+//		sourceVertices[3] = objectPosition.x + dir.x;
+//		sourceVertices[4] = objectPosition.y + dir.y;
+//		sourceVertices[5] = objectPosition.z + dir.z;
+//
+//		glBindVertexArray(this->Vaos->vao);
+//		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+//
+//		glBufferData(GL_ARRAY_BUFFER, sizeof(sourceVertices), sourceVertices, GL_DYNAMIC_DRAW);
+//		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+//		glEnableVertexAttribArray(0);
+//
 //		// world transformation
 //		glm::mat4 model = glm::mat4(1.0f);
-//		model = glm::translate(model, pos);
-//		model = glm::scale(model, glm::vec3( .1f, .1f, .1f));
-//		shader->setMat4("model", model);
+//		model = glm::translate(model, objectPosition);
+//		model = glm::scale(model, glm::vec3(10, 10, 10));
+//		shader->setMat4("u_model", model);
 //
-//		glDrawElements(GL_TRIANGLES, this->Vao->element_amount, GL_UNSIGNED_INT, 0);
-//		Counter++;
+//		GLDraw();
 //	}
 //};
 
 class LightCubeShader
 {
 public:
+	
 	Shader* shader = nullptr;
 
 	VAO Vao;
@@ -513,10 +416,9 @@ public:
 		glEnableVertexAttribArray(1);
 	}
 
-	void Init()
+	void SetColor(glm::vec3 color)
 	{
-		shader->setInt("material.diffuse", 0);
-		shader->setInt("material.specular", 1);
+		shader->setVec3("u_color", color);
 	}
 
 	void Use(glm::vec3 viewPos)

@@ -107,6 +107,12 @@
     <None Include="..\src\shaders\HeightWave.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\RayCast.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\RayCast.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

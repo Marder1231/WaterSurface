@@ -215,8 +215,7 @@ void TrainView::draw()
 			dirLight->SetAmbient(glm::vec3(.05f, .05f, .05f));
 			dirLight->SetDiffuse(glm::vec3(.4f, .4f, .4f));
 			dirLight->SetSpecular(glm::vec3(.5f, .5f, .5f));
-
-			instance->lights.AddLight(dirLight);
+			tw->lightingWidget->AddLightBrowser(dirLight);
 
 			Lighting::PointLight* pointLights[3];
 			pointLights[0] = new Lighting::PointLight();
@@ -246,9 +245,9 @@ void TrainView::draw()
 			pointLights[2]->SetLinear(0.09);
 			pointLights[2]->SetQuadratic(0.032);
 
-			instance->lights.AddLight(pointLights[0]);
-			instance->lights.AddLight(pointLights[1]);
-			instance->lights.AddLight(pointLights[2]);
+			tw->lightingWidget->AddLightBrowser(pointLights[0]);
+			tw->lightingWidget->AddLightBrowser(pointLights[1]);
+			tw->lightingWidget->AddLightBrowser(pointLights[2]);
 
 			glm::vec3 spotLightPos(1.2f, 1.0f, 2.0f);
 			Lighting::SpotLight* spotLight = new Lighting::SpotLight();
@@ -262,7 +261,7 @@ void TrainView::draw()
 			spotLight->SetQuadratic(0.032);
 			spotLight->SetCutOff(12.5f);
 			spotLight->SetOuterCutOff(15.0f);
-			instance->lights.AddLight(spotLight);
+			tw->lightingWidget->AddLightBrowser(spotLight);
 
 			heightMapShader.SetShader("../src/shaders/HeightWave.vert",
 				nullptr, nullptr, nullptr,
@@ -288,7 +287,6 @@ void TrainView::draw()
 				, nullptr, nullptr, nullptr
 				, "../src/shaders/lightCube.frag");
 			lightCubeShader.SetVAO();
-			lightCubeShader.Init();
 		}
 
 		//if (heightMapShader.shader == nullptr)
@@ -414,6 +412,45 @@ void TrainView::draw()
 	heightMapShader.Use(viewPos);
 	HeightWave.Draw(&heightMapShader);
 
+	lightCubeShader.Use(viewPos);
+	for (auto& light : Environment::GetInstance()->lights.Lightings)
+	{
+		if (light.second->Type == Lighting::EmLightType::Point)
+		{
+			Lighting::PointLight* pointLight = static_cast<Lighting::PointLight*>(light.second);
+
+			if (tw->lightingWidget->nowChooseLightIndex != -1 && pointLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+				lightCubeShader.SetColor(glm::vec3(1, 1, 0));
+			else
+				lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+			lightCubeShader.Draw(pointLight->GetPosition());
+		}
+		else if (light.second->Type == Lighting::EmLightType::Spot)
+		{
+			Lighting::SpotLight* spotLight = static_cast<Lighting::SpotLight*>(light.second);
+
+			if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+				lightCubeShader.SetColor(glm::vec3(1, 1, 0));
+			else
+				lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+
+			lightCubeShader.Draw(spotLight->GetPosition());
+
+			glm::vec3 rayDirection = spotLight->GetDirection();
+			
+			//draw raycast
+			glPushMatrix();
+			glBegin(GL_LINES);
+			if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+				glColor3f(1, 1, 0);
+			else
+				glColor3f(1, 1, 1);
+			glVertex3f(0, 0, 0);
+			glVertex3f(6.24 * rayDirection.x, 6.24 * rayDirection.y, 6.24 * rayDirection.z);
+			glEnd();
+			glPopMatrix();
+		}
+	}
 	//Lighting::PointLight* light = static_cast<Lighting::PointLight*>(Environment::GetInstance()->lights.Lightings[lightid]);
 	//lightCubeShader.Use(viewPos);
 	//lightCubeShader.Draw(light->GetPosition());

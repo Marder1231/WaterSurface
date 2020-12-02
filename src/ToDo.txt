@@ -1,0 +1,8 @@
+shader can select which lighting will use
+and can avoid when didn't use lighting
+
+main window can setup will lighting
+
+//note
+shader draw line, now use same point to implement
+other method is use geometric shader

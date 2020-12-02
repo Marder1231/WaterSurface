@@ -21,6 +21,7 @@
 #pragma once
 
 // Preclarify to prevent the compiler error
+class LightingWidget;
 class TrainWindow;
 class Fl_Widget;
 
@@ -30,3 +31,14 @@ void damageCB(Fl_Widget*, TrainWindow* tw);
 // Idle callback: for run the step of the window
 void runButtonCB(TrainWindow* tw);
 
+
+//------------------------------------------------------------------------
+//                         LightingWidget call back
+//lightlist browser choose which light
+void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw);
+
+//certain setup position
+void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw);
+
+void ChangeLightAttributeCB(Fl_Button* w, LightingWidget* lw);
+//------------------------------------------------------------------------

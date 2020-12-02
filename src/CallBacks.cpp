@@ -65,3 +65,33 @@ void runButtonCB(TrainWindow* tw)
 		}
 	}
 }
+
+void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw)
+{
+	lw->ChooseWhichLight(w->value() - 1);
+}
+
+void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw)
+{
+	if (lw->nowChooseLightIndex == -1)
+		return;
+
+	if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::position)
+		lw->SetupLightingPosition();
+	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::direction)
+		lw->SetupLightingDirection();
+	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::ambient)
+		lw->SetupLightingAmbient();
+	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::diffuse)
+		lw->SetupLightingDiffuse();
+	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::specular)
+		lw->SetupLightingSpecular();
+	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::attenuation)
+		lw->SetupLightingAttenuation();
+	else throw new std::exception("this attribute didn't define");
+}
+
+void ChangeLightAttributeCB(Fl_Button* w, LightingWidget* lw)
+{
+	lw->PrintWhiceAttribute();
+}
