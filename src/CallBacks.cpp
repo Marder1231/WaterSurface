@@ -66,6 +66,14 @@ void runButtonCB(TrainWindow* tw)
 	}
 }
 
+void ChoiceWhichOAttributeCB(Fl_Button* w, TrainWindow* tw)
+{
+	tw->ShowWhichObjectAttribute();
+}
+
+
+#pragma region LightWidget
+
 void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw)
 {
 	lw->ChooseWhichLight(w->value() - 1);
@@ -77,19 +85,7 @@ void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw)
 		return;
 
 	lw->PrintWhiceAttribute();
-	if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::position)
-		lw->SetupLightingPosition();
-	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::direction)
-		lw->SetupLightingDirection();
-	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::ambient)
-		lw->SetupLightingAmbient();
-	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::diffuse)
-		lw->SetupLightingDiffuse();
-	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::specular)
-		lw->SetupLightingSpecular();
-	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::attenuation)
-		lw->SetupLightingAttenuation();
-	else throw new std::exception("this attribute didn't define");
+	lw->SetUpAttribute( (LightingWidget::EmAttributeMenuIndex)lw->LightAttributeMenu->value() );
 }
 
 void ChangeLightAttributeCB(Fl_Button* w, LightingWidget* lw)
@@ -101,3 +97,5 @@ void DeleteLightCB(Fl_Button* w, LightingWidget* lw)
 {
 	lw->DeleteNowChooseLight();
 }
+
+#pragma endregion LightWidget

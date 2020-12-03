@@ -1,9 +1,10 @@
-shader can select which lighting will use
-and can avoid when didn't use lighting
+update GameObject material
 
-upload GameObject material
+update shader
 
-upload shader
+skybox
+
+can change shader max lightings amount
 
 //note
 shader draw line, now use glbegin

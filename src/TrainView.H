@@ -236,11 +236,13 @@ public:
 };
 class HeightMapWave
 {
+	int timer = 0;
+
+	const int WavePictureAmount= 200;
 public:
 	glm::vec3 Position = glm::vec3(0, 0, 0);
 
 	float WaveHeights[HeightWaveGridSize][HeightWaveGridSize];
-	int timer = 0;
 
 	/// <summary>
 	/// have to use shader first
@@ -248,7 +250,7 @@ public:
 	/// <param name="aShader"></param>
 	virtual void Draw(ObjectShader* aShader)
 	{
-		aShader->textures[timer % 200]->bind(0);
+		aShader->textures[timer % WavePictureAmount]->bind(0);
 		glUniform1i(glGetAttribLocation(aShader->shader->ID, "u_heightMap"), 0);
 
 		glBindVertexArray(aShader->Vaos->vao);
@@ -260,7 +262,14 @@ public:
 
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
 		aShader->GLDraw();
-		timer++;
+	}
+
+	void WaveGoGOo(int _speed)
+	{
+		timer += _speed;
+
+		if (timer >= WavePictureAmount)
+			timer -= WavePictureAmount;
 	}
 };
 
@@ -445,11 +454,12 @@ public:
 		glBindVertexArray(this->Vao.vao);
 	}
 
-	void Draw(/*object attribute*/glm::vec3 objectPosition)
+	void Draw(/*object attribute*/glm::vec3 objectPosition, glm::vec3 scale = glm::vec3(1, 1, 1))
 	{
 		// world transformation
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, objectPosition);
+		model = glm::scale(model, scale);
 		shader->setMat4("model", model);
 
 		glDrawArrays(GL_TRIANGLES, 0, 36);

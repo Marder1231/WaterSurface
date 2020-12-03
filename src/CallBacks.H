@@ -31,6 +31,7 @@ void damageCB(Fl_Widget*, TrainWindow* tw);
 // Idle callback: for run the step of the window
 void runButtonCB(TrainWindow* tw);
 
+void ChoiceWhichOAttributeCB(Fl_Button* w, TrainWindow* tw);
 
 //------------------------------------------------------------------------
 //                         LightingWidget call back

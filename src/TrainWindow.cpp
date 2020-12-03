@@ -67,8 +67,8 @@ TrainWindow(const int x, const int y)
 		ChoiceWhichGameObjectAttribute->add("lighting");
 		ChoiceWhichGameObjectAttribute->add("Object");
 
-		choiceWhichObjectAttributeButton = new Fl_Button(700, pty + 30, 24, 24, "Select");
-		//choiceWhichObjectAttributeButton->callback((Fl_Callback*) /*call back*/, this);
+		choiceWhichObjectAttributeButton = new Fl_Button(700, pty + 30, 24, 24, "Select Obj");
+		choiceWhichObjectAttributeButton->callback((Fl_Callback*)ChoiceWhichOAttributeCB, this);
 
 		lightingWidget = new LightingWidget(605, pty, 190, 590);
 		this->add(lightingWidget);
@@ -76,7 +76,7 @@ TrainWindow(const int x, const int y)
 
 		objectWidget = new ObjectWidget(605, pty, 190, 590);
 		this->add(objectWidget);
-		//objectWidget->hide();
+		objectWidget->hide();
 
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
@@ -126,132 +126,120 @@ void LightingWidget::AddLightBrowser(Lighting::BaseLight* _light)
 
 void LightingWidget::ShowLightAttribute(Lighting::DirLight* _light, int which)
 {
-	if (which == (int)AttributeMenuIndex::position)
+	ShowAttribute(3);
+	if (which == (int)EmAttributeMenuIndex::position)
 	{
 
 	}
-	else if (which == (int)AttributeMenuIndex::direction)
+	else if (which == (int)EmAttributeMenuIndex::direction)
 	{
-		ShowDirection();
-		oDir[X]->value(std::to_string(_light->GetDirection().x).c_str());
-		oDir[Y]->value(std::to_string(_light->GetDirection().y).c_str());
-		oDir[Z]->value(std::to_string(_light->GetDirection().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetDirection().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetDirection().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetDirection().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::attenuation)	//attenuation
+	else if (which == (int)EmAttributeMenuIndex::attenuation)	//attenuation
 	{
 
 	}
-	else if (which == (int)AttributeMenuIndex::ambient)	//ambient
+	else if (which == (int)EmAttributeMenuIndex::ambient)	//ambient
 	{
-		ShowAmbient();
-		oAmbient[X]->value(std::to_string(_light->GetAmbient().x).c_str());
-		oAmbient[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
-		oAmbient[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetAmbient().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::diffuse)	//diffuse
+	else if (which == (int)EmAttributeMenuIndex::diffuse)	//diffuse
 	{
-		ShowDiffuse();
-		oDiffuse[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
-		oDiffuse[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
-		oDiffuse[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::specular)	//specular
+	else if (which == (int)EmAttributeMenuIndex::specular)	//specular
 	{
-		ShowSpecular();
-		oSpecular[X]->value(std::to_string(_light->GetSpecular().x).c_str());
-		oSpecular[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
-		oSpecular[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetSpecular().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
 	}
 }
 
 void LightingWidget::ShowLightAttribute(Lighting::PointLight* _light, int which)
 {
+	ShowAttribute(3);
 	//position
-	if (which == (int)AttributeMenuIndex::position)
+	if (which == (int)EmAttributeMenuIndex::position)
 	{
-		ShowPosition();
-		oPos[X]->value(std::to_string(_light->GetPosition().x).c_str());
-		oPos[Y]->value(std::to_string(_light->GetPosition().y).c_str());
-		oPos[Z]->value(std::to_string(_light->GetPosition().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetPosition().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetPosition().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetPosition().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::direction)	//direction
+	else if (which == (int)EmAttributeMenuIndex::direction)	//direction
 	{
 
 	}
-	else if (which == (int)AttributeMenuIndex::attenuation)	//attenuation
+	else if (which == (int)EmAttributeMenuIndex::attenuation)	//attenuation
 	{
-		ShowAttenuation();
-		oAttenuation[X]->value(std::to_string(_light->GetConstant()).c_str());
-		oAttenuation[Y]->value(std::to_string(_light->GetLinear()).c_str());
-		oAttenuation[Z]->value(std::to_string(_light->GetQuadratic()).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetConstant()).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetLinear()).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetQuadratic()).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::ambient)	//ambient
+	else if (which == (int)EmAttributeMenuIndex::ambient)	//ambient
 	{
-		ShowAmbient();
-		oAmbient[X]->value(std::to_string(_light->GetAmbient().x).c_str());
-		oAmbient[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
-		oAmbient[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetAmbient().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::diffuse)	//diffuse
+	else if (which == (int)EmAttributeMenuIndex::diffuse)	//diffuse
 	{
-		ShowDiffuse();
-		oDiffuse[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
-		oDiffuse[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
-		oDiffuse[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::specular)	//specular
+	else if (which == (int)EmAttributeMenuIndex::specular)	//specular
 	{
-		ShowSpecular();
-		oSpecular[X]->value(std::to_string(_light->GetSpecular().x).c_str());
-		oSpecular[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
-		oSpecular[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetSpecular().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
 	}
 	this->DamageMe();
 }
 
 void LightingWidget::ShowLightAttribute(Lighting::SpotLight* _light, int which)
 {
-	if (which == (int)AttributeMenuIndex::position)
+	ShowAttribute(3);
+	if (which == (int)EmAttributeMenuIndex::position)
 	{
-		ShowPosition();
-		oPos[X]->value(std::to_string(_light->GetPosition().x).c_str());
-		oPos[Y]->value(std::to_string(_light->GetPosition().y).c_str());
-		oPos[Z]->value(std::to_string(_light->GetPosition().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetPosition().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetPosition().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetPosition().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::direction)
+	else if (which == (int)EmAttributeMenuIndex::direction)
 	{
-		ShowDirection();
-		oDir[X]->value(std::to_string(_light->GetDirection().x).c_str());
-		oDir[Y]->value(std::to_string(_light->GetDirection().y).c_str());
-		oDir[Z]->value(std::to_string(_light->GetDirection().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetDirection().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetDirection().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetDirection().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::attenuation)	//attenuation
+	else if (which == (int)EmAttributeMenuIndex::attenuation)	//attenuation
 	{
-		ShowAttenuation();
-		oAttenuation[X]->value(std::to_string(_light->GetConstant()).c_str());
-		oAttenuation[Y]->value(std::to_string(_light->GetLinear()).c_str());
-		oAttenuation[Z]->value(std::to_string(_light->GetQuadratic()).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetConstant()).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetLinear()).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetQuadratic()).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::ambient)	//ambient
+	else if (which == (int)EmAttributeMenuIndex::ambient)	//ambient
 	{
-		ShowAmbient();
-		oAmbient[X]->value(std::to_string(_light->GetAmbient().x).c_str());
-		oAmbient[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
-		oAmbient[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetAmbient().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetAmbient().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetAmbient().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::diffuse)	//diffuse
+	else if (which == (int)EmAttributeMenuIndex::diffuse)	//diffuse
 	{
-		ShowDiffuse();
-		oDiffuse[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
-		oDiffuse[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
-		oDiffuse[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetDiffuse().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetDiffuse().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetDiffuse().z).c_str());
 	}
-	else if (which == (int)AttributeMenuIndex::specular)	//specular
+	else if (which == (int)EmAttributeMenuIndex::specular)	//specular
 	{
-		ShowSpecular();
-		oSpecular[X]->value(std::to_string(_light->GetSpecular().x).c_str());
-		oSpecular[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
-		oSpecular[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
+		outputAttribute[X]->value(std::to_string(_light->GetSpecular().x).c_str());
+		outputAttribute[Y]->value(std::to_string(_light->GetSpecular().y).c_str());
+		outputAttribute[Z]->value(std::to_string(_light->GetSpecular().z).c_str());
 	}
 }
 
@@ -265,7 +253,7 @@ void LightingWidget::PrintWhiceAttribute()
 		return;
 
 	//position
-	if (nowChoiceValue == (int)AttributeMenuIndex::position)
+	if (nowChoiceValue == (int)EmAttributeMenuIndex::position)
 	{
 		if (light->Type == Lighting::EmLightType::Point)
 		{
@@ -278,7 +266,7 @@ void LightingWidget::PrintWhiceAttribute()
 			ShowLightAttribute(spot, nowChoiceValue);
 		}
 	}
-	else if (nowChoiceValue == (int)AttributeMenuIndex::direction)	//direction
+	else if (nowChoiceValue == (int)EmAttributeMenuIndex::direction)	//direction
 	{
 		if (light->Type == Lighting::EmLightType::Dir)
 		{
@@ -291,7 +279,7 @@ void LightingWidget::PrintWhiceAttribute()
 			ShowLightAttribute(spot, nowChoiceValue);
 		}
 	}
-	else if (nowChoiceValue == (int)AttributeMenuIndex::attenuation)	//attenuation
+	else if (nowChoiceValue == (int)EmAttributeMenuIndex::attenuation)	//attenuation
 	{
 		if (light->Type == Lighting::EmLightType::Point)
 		{
@@ -304,9 +292,9 @@ void LightingWidget::PrintWhiceAttribute()
 			ShowLightAttribute(spot, nowChoiceValue);
 		}
 	}
-	else if (nowChoiceValue == (int)AttributeMenuIndex::ambient
-		|| nowChoiceValue == (int)AttributeMenuIndex::diffuse
-		|| nowChoiceValue == (int)AttributeMenuIndex::specular)	//material
+	else if (nowChoiceValue == (int)EmAttributeMenuIndex::ambient
+		|| nowChoiceValue == (int)EmAttributeMenuIndex::diffuse
+		|| nowChoiceValue == (int)EmAttributeMenuIndex::specular)	//material
 	{
 		if (light->Type == Lighting::EmLightType::Point)
 		{
@@ -365,177 +353,6 @@ void LightingWidget::ChooseWhichLight(int choose)
 	this->DamageMe();
 }
 
-void LightingWidget::SetupLightingPosition()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-
-
-	if (nowLight->Type == Lighting::EmLightType::Point)
-	{
-		Lighting::PointLight* light = static_cast<Lighting::PointLight*>(nowLight);
-
-		SetVec3(light->GetPosition(), iPos[X]->value(), iPos[Y]->value(), iPos[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		SetVec3(light->GetPosition(), iPos[X]->value(), iPos[Y]->value(), iPos[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
-void LightingWidget::SetupLightingDirection()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();	
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-	if (nowLight->Type == Lighting::EmLightType::Dir)
-	{
-		Lighting::DirLight* light = static_cast<Lighting::DirLight*>(nowLight);
-
-		SetVec3(light->GetDirection(), iDir[X]->value(), iDir[Y]->value(), iDir[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		SetVec3(light->GetDirection(), iDir[X]->value(), iDir[Y]->value(), iDir[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
-void LightingWidget::SetupLightingAmbient()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-	if (nowLight->Type == Lighting::EmLightType::Dir)
-	{
-		Lighting::DirLight* light = static_cast<Lighting::DirLight*>(nowLight);
-
-		SetVec3(light->GetAmbient(), iAmbient[X]->value(), iAmbient[Y]->value(), iAmbient[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Point)
-	{
-		Lighting::PointLight* light = static_cast<Lighting::PointLight*>(nowLight);
-
-		SetVec3(light->GetAmbient(), iAmbient[X]->value(), iAmbient[Y]->value(), iAmbient[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		SetVec3(light->GetAmbient(), iAmbient[X]->value(), iAmbient[Y]->value(), iAmbient[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
-void LightingWidget::SetupLightingDiffuse()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-	if (nowLight->Type == Lighting::EmLightType::Dir)
-	{
-		Lighting::DirLight* light = static_cast<Lighting::DirLight*>(nowLight);
-
-		SetVec3(light->GetDiffuse(), iDiffuse[X]->value(), iDiffuse[Y]->value(), iDiffuse[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Point)
-	{
-		Lighting::PointLight* light = static_cast<Lighting::PointLight*>(nowLight);
-
-		SetVec3(light->GetDiffuse(), iDiffuse[X]->value(), iDiffuse[Y]->value(), iDiffuse[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		SetVec3(light->GetDiffuse(), iDiffuse[X]->value(), iDiffuse[Y]->value(), iDiffuse[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
-void LightingWidget::SetupLightingSpecular()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-	if (nowLight->Type == Lighting::EmLightType::Dir)
-	{
-		Lighting::DirLight* light = static_cast<Lighting::DirLight*>(nowLight);
-
-		SetVec3(light->GetSpecular(), iSpecular[X]->value(), iSpecular[Y]->value(), iSpecular[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Point)
-	{
-		Lighting::PointLight* light = static_cast<Lighting::PointLight*>(nowLight);
-
-		SetVec3(light->GetSpecular(), iSpecular[X]->value(), iSpecular[Y]->value(), iSpecular[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		SetVec3(light->GetSpecular(), iSpecular[X]->value(), iSpecular[Y]->value(), iSpecular[Z]->value());
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
-void LightingWidget::SetupLightingAttenuation()
-{
-	int nowAttributeIndex = LightAttributeMenu->value();
-	Lighting::BaseLight* nowLight = GetNowLight();
-	if (nowLight == nullptr)
-		return;
-	if (nowLight->Type == Lighting::EmLightType::Dir)
-	{
-		Lighting::DirLight* light = static_cast<Lighting::DirLight*>(nowLight);
-
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Point)
-	{
-		Lighting::PointLight* light = static_cast<Lighting::PointLight*>(nowLight);
-
-		light->SetConstant(std::stof(iAttenuation[0]->value()));
-		light->SetLinear(std::stof(iAttenuation[1]->value()));
-		light->SetQuadratic(std::stof(iAttenuation[2]->value()));
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	else if (nowLight->Type == Lighting::EmLightType::Spot)
-	{
-		Lighting::SpotLight* light = static_cast<Lighting::SpotLight*>(nowLight);
-
-		light->SetConstant(std::stof(iAttenuation[0]->value()));
-		light->SetLinear(std::stof(iAttenuation[1]->value()));
-		light->SetQuadratic(std::stof(iAttenuation[2]->value()));
-		ShowLightAttribute(light, nowAttributeIndex);
-	}
-	this->DamageMe();
-}
-
 #pragma endregion LightingWidget
 
 //************************************************************************
@@ -565,7 +382,7 @@ advanceTrain(float dir)
 {
 	//#####################################################################
 	// TODO: make this work for your train
-	trainView->HeightWave.timer += .1;
+	trainView->HeightWave.WaveGoGOo(1);
 
 	//#####################################################################
 #ifdef EXAMPLE_SOLUTION
