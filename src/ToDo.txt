@@ -1,8 +1,10 @@
 shader can select which lighting will use
 and can avoid when didn't use lighting
 
-main window can setup will lighting
+upload GameObject material
+
+upload shader
 
 //note
-shader draw line, now use same point to implement
-other method is use geometric shader
+shader draw line, now use glbegin
+other method is use geometric shader or same vertex in triangle

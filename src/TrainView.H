@@ -214,11 +214,18 @@ class CTrack;
 class HeightMapShader : public ObjectShader
 {
 public:
+	virtual void InitShaderAttribute() override
+	{
+		shader->setVec3("material.diffuse", .24f, .6f, 1);
+		shader->setVec3("material.specular", .3f, .3f, 1);
+		shader->setFloat("material.shininess", 32.0f);
+	}
+
 	virtual void Use(glm::vec3 viewPos) override
 	{
 		shader->Use();
 
-		shader->setVec3("viewPos", viewPos);
+		shader->setVec3("u_cameraPos", viewPos);
 
 		//加入光效
 		Environment::GetInstance()->lights.SetShader(shader);
@@ -242,15 +249,16 @@ public:
 	virtual void Draw(ObjectShader* aShader)
 	{
 		aShader->textures[timer % 200]->bind(0);
-		glUniform1i(glGetAttribLocation(aShader->shader->ID, "heightMap"), 0);
+		glUniform1i(glGetAttribLocation(aShader->shader->ID, "u_heightMap"), 0);
 
 		glBindVertexArray(aShader->Vaos->vao);
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, Position);
 		
-		aShader->shader->setMat4("model", modelMatrix);
-		
+		aShader->shader->setMat4("u_model", modelMatrix);
+
+		glPatchParameteri(GL_PATCH_VERTICES, 3);
 		aShader->GLDraw();
 		timer++;
 	}

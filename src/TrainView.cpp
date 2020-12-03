@@ -264,7 +264,7 @@ void TrainView::draw()
 			tw->lightingWidget->AddLightBrowser(spotLight);
 
 			heightMapShader.SetShader("../src/shaders/HeightWave.vert",
-				nullptr, nullptr, nullptr,
+				"../src/shaders/HeightWave.tesc", "../src/shaders/HeightWave.tese", nullptr,
 				"../src/shaders/HeightWave.frag");
 			heightMapShader.SetVao();
 			for (int i = 0; i < 200; i++)
@@ -413,7 +413,9 @@ void TrainView::draw()
 	HeightWave.Draw(&heightMapShader);
 
 	lightCubeShader.Use(viewPos);
-	for (auto& light : Environment::GetInstance()->lights.Lightings)
+
+	Environment* instance = Environment::GetInstance();
+	for (auto& light : instance->lights.Lightings)
 	{
 		if (light.second->Type == Lighting::EmLightType::Point)
 		{

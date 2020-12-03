@@ -56,10 +56,56 @@ class TrainView;
 #include "TrainExample/TrainExample.H"
 #endif
 
+#define CHANGEATTRIBUTE_MAXSIZE 3
+
+class ObjectWidget : public Fl_Group
+{
+	const int ChangeSize = 1;
+public:
+	const int X = 0;
+	const int Y = 1;
+	const int Z = 2;
+
+	Fl_Input* fl_Input[CHANGEATTRIBUTE_MAXSIZE] = { nullptr };
+	Fl_Output* fl_Output[CHANGEATTRIBUTE_MAXSIZE] = { nullptr };
+	
+	Fl_Browser* ObjectList;
+
+	Fl_Button* attributeChoiceButton;
+	Fl_Choice* AttributeMenu;
+	ObjectWidget(int _x, int _y, int _z, int _w) : Fl_Group(_x, _y, _z, _w)
+	{
+		this->begin();
+
+		int pty = y();
+
+		pty += 76;
+		ObjectList = new Fl_Browser(605, pty, 80, 124, "Object List");
+		ObjectList->type(2);
+		ObjectList->callback((Fl_Callback*)ChooseWhichLightsCB, this);
+
+		AttributeMenu = new Fl_Choice(690, pty, 100, 24);
+		AttributeMenu->add("position");
+		AttributeMenu->add("ambient");
+		AttributeMenu->add("diffuse");
+		AttributeMenu->add("specular");
+		AttributeMenu->value(1);
+
+		attributeChoiceButton = new Fl_Button(690, pty + 30, 24, 26, "Select");
+		attributeChoiceButton->callback((Fl_Callback*)ChangeLightAttributeCB, this);
+
+		pty += 99;
+
+		this->end();
+	}
+};
+
 class LightingWidget : public Fl_Group
 {
 	void SetVec3(glm::vec3& vec, std::string _x, std::string _y, std::string _z)
 	{
+		if (_x.size() == 0 || _y.size() == 0 || _z.size() < 0)
+			return;
 		glm::vec3 pos = glm::vec3(std::stof(_x), std::stof(_y), std::stof(_z));
 		vec = pos;
 	}
@@ -90,7 +136,6 @@ public:
 	//-------------------attenuation-----------
 	Fl_Input* iAttenuation[3] = { nullptr };
 	Fl_Output* oAttenuation[3] = { nullptr };
-
 
 	void CloseAllAttribute()
 	{
@@ -182,7 +227,7 @@ public:
 	void SetupLightingDiffuse();
 	void SetupLightingSpecular();
 	void SetupLightingAttenuation();
-
+	
 	/// <summary>
 	/// restore lights of id which is from environment.light 
 	/// </summary>
@@ -195,11 +240,38 @@ public:
 	void ShowLightAttribute(Lighting::PointLight* _light, int which);
 	void ShowLightAttribute(Lighting::SpotLight* _light, int which);
 	
+	Fl_Button* deleteLightButton;
+	void DeleteNowChooseLight()
+	{
+		if (nowChooseLightIndex == -1)
+			return;
+
+		Lighting::BaseLight* _light = GetNowLight();
+
+		Environment* instance = Environment::GetInstance();
+
+
+		//$$$ bug LightList Browers already delete, but it also display
+		//remove this light at LightList
+		LightList->remove(nowChooseLightIndex);
+		LightListIDs.erase(LightListIDs.begin() + nowChooseLightIndex);
+
+		nowChooseLightIndex = -1;
+
+		//remove this light in environment
+		instance->lights.RemoveLight(_light);
+
+		this->DamageMe();
+	}
+
 	Lighting::BaseLight* GetNowLight()
 	{
 		if (nowChooseLightIndex < LightList->size() && nowChooseLightIndex >= 0)
 		{
 			Environment* instance = Environment::GetInstance();
+			if (nowChooseLightIndex >= instance->lights.Lightings.size())
+				return nullptr;
+
 			if (instance->lights.Lightings.find(LightListIDs[nowChooseLightIndex]) != instance->lights.Lightings.end())
 				return instance->lights.Lightings[LightListIDs[nowChooseLightIndex]];
 			else
@@ -228,7 +300,7 @@ public:
 
 		int pty = y();
 		
-		pty += 24;
+		pty += 76;
 		LightList = new Fl_Browser(605, pty, 80, 124, "Light List");
 		LightList->type(2);
 		LightList->callback((Fl_Callback*)ChooseWhichLightsCB,this);
@@ -245,7 +317,7 @@ public:
 		attributeChoiceButton = new Fl_Button(690, pty + 30, 24, 26, "Select");
 		attributeChoiceButton->callback((Fl_Callback*)ChangeLightAttributeCB, this);
 
-		pty += 145;
+		pty += 99;
 
 		int lightAttributePty = pty;
 		iPos[X] = new Fl_Input(624, lightAttributePty, 50, 24, "P iX"); iPos[X]->hide();
@@ -311,6 +383,10 @@ public:
 		setupPositionCertainButtom = new Fl_Button(710, lightAttributePty, 50, 24, "setup");
 		setupPositionCertainButtom->callback((Fl_Callback*)LightingPositionCertainSetupCB, this);
 
+		//$$$ delete and add light
+		deleteLightButton = new Fl_Button(605, lightAttributePty, 50, 24, "delete");
+		deleteLightButton->callback((Fl_Callback*)DeleteLightCB, this);
+
 		this->end();
 	}
 
@@ -347,8 +423,14 @@ class TrainWindow : public Fl_Double_Window {
 		//---------------light attribute --------------------
 		Fl_Group* widget;	// all widgets, grouped for resizing ease
 
+		//------------------GameObejct attribute widget-----------
+#pragma region GameObjectAttributeWidget
+		Fl_Choice* ChoiceWhichGameObjectAttribute;
+		Fl_Button* choiceWhichObjectAttributeButton;
 
 		LightingWidget* lightingWidget;
+		ObjectWidget* objectWidget;
+#pragma endregion GameObjectAttributeWidget
 
 		// we have other widgets as part of the sample solution
 		// this is not for 559 students to know about

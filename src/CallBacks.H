@@ -41,4 +41,6 @@ void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw);
 void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw);
 
 void ChangeLightAttributeCB(Fl_Button* w, LightingWidget* lw);
+
+void DeleteLightCB(Fl_Button* w, LightingWidget* lw);
 //------------------------------------------------------------------------

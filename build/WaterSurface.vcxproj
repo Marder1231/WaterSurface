@@ -325,11 +325,15 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\color.frag" />
     <None Include="..\src\shaders\colors.vert" />
     <None Include="..\src\shaders\HeightWave.frag" />
+    <None Include="..\src\shaders\HeightWave.tesc" />
+    <None Include="..\src\shaders\HeightWave.tese" />
     <None Include="..\src\shaders\HeightWave.vert" />
     <None Include="..\src\shaders\lightCbue.vert" />
     <None Include="..\src\shaders\lightCube.frag" />
     <None Include="..\src\shaders\RayCast.frag" />
     <None Include="..\src\shaders\RayCast.vert" />
+    <None Include="..\src\shaders\test.tesc" />
+    <None Include="..\src\shaders\test.tese" />
     <None Include="..\src\shaders\wave.frag" />
     <None Include="..\src\shaders\wave.vert" />
     <None Include="..\src\shaders\waveTest.frag" />

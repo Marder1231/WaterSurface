@@ -76,6 +76,7 @@ void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw)
 	if (lw->nowChooseLightIndex == -1)
 		return;
 
+	lw->PrintWhiceAttribute();
 	if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::position)
 		lw->SetupLightingPosition();
 	else if (lw->LightAttributeMenu->value() == (int)LightingWidget::AttributeMenuIndex::direction)
@@ -94,4 +95,9 @@ void LightingPositionCertainSetupCB(Fl_Button* w, LightingWidget* lw)
 void ChangeLightAttributeCB(Fl_Button* w, LightingWidget* lw)
 {
 	lw->PrintWhiceAttribute();
+}
+
+void DeleteLightCB(Fl_Button* w, LightingWidget* lw)
+{
+	lw->DeleteNowChooseLight();
 }

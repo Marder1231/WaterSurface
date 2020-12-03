@@ -113,6 +113,18 @@
     <None Include="..\src\shaders\RayCast.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\test.tese">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\test.tesc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\HeightWave.tesc">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\HeightWave.tese">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

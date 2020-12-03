@@ -294,7 +294,7 @@ public:
 	class Lights
 	{
 		//³ø©úµP
-		int chooseID()
+		int generateID()
 		{
 			int id = rand() % 624;
 
@@ -321,22 +321,29 @@ public:
 
 		std::map<int, Lighting::BaseLight*> Lightings;
 
-		void AddLight(Lighting::BaseLight* _dirLight)
+		void AddLight(Lighting::BaseLight* _light)
 		{
-			int id = chooseID();
-			_dirLight->ID = id;
-			Lightings[id] = _dirLight;
+			int id = generateID();
+			_light->ID = id;
+			Lightings[id] = _light;
 		}
 	
+		void RemoveLight(Lighting::BaseLight* _light)
+		{
+			int id = _light->ID;
+			
+			Lightings.erase(id);
+		}
+
 		/// <summary>
 		/// set this shader within light effect
 		/// </summary>
 		/// <param name="shader"></param>
 		void SetShader(Shader* shader)
 		{
-			const std::string dirLightInShaderName = "dirLight";
+			const std::string dirLightInShaderName = "dirLights";
 			const std::string pointLightInShaderName = "pointLights";
-			const std::string spotLightInShaderName = "spotLight";
+			const std::string spotLightInShaderName = "spotLights";
 
 			int dirCounter = 0;
 			int pointCounter = 0;
@@ -385,7 +392,6 @@ public:
 				}
 				else if (light.second->Type == Lighting::EmLightType::Spot)
 				{					
-					continue;
 					if (spotCounter > Max_SpotLight_Amount)
 					{
 						std::cout << "number of spot lighting bigger than the shader setting\n";
@@ -410,6 +416,10 @@ public:
 				}
 				else
 					throw new std::exception("error light type");
+
+				shader->setInt("u_PointLightAmount", pointCounter);
+				shader->setInt("u_DirLightAmount", dirCounter);
+				shader->setInt("u_SpotLightAmount", spotCounter);
 			}
 		}
 
@@ -442,8 +452,8 @@ public:
 	/// </summary>
 	virtual void InitShaderAttribute()
 	{
-		shader->setVec3("material.diffuse", 0, 0, 1);
-		shader->setVec3("material.specular", 0, 0, 1);
+		shader->setVec3("material.diffuse", 1, 1, 1);
+		shader->setVec3("material.specular", 1, 1, 1);
 		shader->setFloat("material.shininess", 32.0f);
 	}
 
@@ -478,11 +488,13 @@ public:
 
 		const int clipAmount = 1600;
 
+		float size = 100;
+
 		float sourceVertices[] = {
-			-100.0f ,0.0f , -100.0f,
-			-100.0f ,0.0f , 100.0f ,
-			100.0f ,0.0f ,100.0f ,
-			100.0f ,0.0f ,-100.0f };
+			-size ,0.0f , -size,
+			-size ,0.0f , size ,
+			size ,0.0f ,size ,
+			size ,0.0f ,-size };
 		GLfloat  sourceNormal[] = {
 			0.0f, 1.0f, 0.0f,
 			0.0f, 1.0f, 0.0f,
@@ -588,7 +600,6 @@ public:
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_STATIC_DRAW);
 	}
 
-
 	/// <summary>
 	/// setting shader model view matrix and proection matrix
 	/// </summary>
@@ -598,8 +609,8 @@ public:
 		glm::mat4 view;
 		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
 		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
-		shader->setMat4("projection", projection);
-		shader->setMat4("view", view);
+		shader->setMat4("u_projection", projection);
+		shader->setMat4("u_view", view);
 	}
 
 	void BindTextures()
@@ -632,11 +643,15 @@ public:
 	/// </summary>
 	virtual void GLDraw()
 	{
-		glDrawElements(GL_TRIANGLES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_PATCHES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
 	}
 
 	~ObjectShader()
 	{
+		glDeleteVertexArrays(1, &this->Vaos->vao);
+		glDeleteBuffers(4, this->Vaos->vbo);
+		glDeleteBuffers(1, &this->Vaos->ebo);
+
 		delete Vaos;
 		delete shader;
 		for (int i = 0; i < textures.size(); i++)

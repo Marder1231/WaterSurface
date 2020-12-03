@@ -62,9 +62,22 @@ TrainWindow(const int x, const int y)
 
 		runButton = new Fl_Button(605,pty,60,20,"Run");
 		togglify(runButton);
+		
+		ChoiceWhichGameObjectAttribute = new Fl_Choice(700, pty, 60, 24);
+		ChoiceWhichGameObjectAttribute->add("lighting");
+		ChoiceWhichGameObjectAttribute->add("Object");
+
+		choiceWhichObjectAttributeButton = new Fl_Button(700, pty + 30, 24, 24, "Select");
+		//choiceWhichObjectAttributeButton->callback((Fl_Callback*) /*call back*/, this);
 
 		lightingWidget = new LightingWidget(605, pty, 190, 590);
 		this->add(lightingWidget);
+		lightingWidget->hide();
+
+		objectWidget = new ObjectWidget(605, pty, 190, 590);
+		this->add(objectWidget);
+		//objectWidget->hide();
+
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
 #endif
@@ -95,6 +108,7 @@ togglify(Fl_Button* b, int val)
 	b->callback((Fl_Callback*)damageCB,this);
 }
 
+#pragma region LightingWidget
 void LightingWidget::AddLightBrowser(Lighting::BaseLight* _light)
 {
 	Environment::GetInstance()->lights.AddLight(_light);
@@ -521,6 +535,8 @@ void LightingWidget::SetupLightingAttenuation()
 	}
 	this->DamageMe();
 }
+
+#pragma endregion LightingWidget
 
 //************************************************************************
 //
