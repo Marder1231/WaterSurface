@@ -5,6 +5,7 @@ struct Material {
     vec3 diffuse;
     vec3 specular;
     float shininess;
+    samplerCube u_skybox;
 }; 
 
 
@@ -53,6 +54,7 @@ in vec3 f_position;
 in vec2 f_textCoords;
 
 uniform vec3 u_cameraPos;
+
 uniform DirLight dirLights[NR_DIR_LIGHTS];
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLights[NR_SPOT_LIGHTS];
@@ -63,7 +65,6 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 f_position, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 f_position, vec3 viewDir);
 
-
 void main()
 {    
     // properties
@@ -72,6 +73,24 @@ void main()
     vec3 norm = normalize(cross(dx, dy));
     vec3 viewDir = normalize(u_cameraPos - f_position);
     
+    float air = 1.00f;
+    float water = 1.33f;
+    float ice = 1.309f;
+    float glass = 1.52f;
+    float diamond = 2.42f;
+    
+    //          from / into;
+    float ratio = air / glass;
+    vec3 R = refract(-viewDir, norm, ratio);
+    vec3 result = vec3(.1f * texture(material.u_skybox, R).rgb );
+
+    R = reflect(viewDir, norm);
+    R.z = -R.z;
+    R.x = -R.x;
+    R.y = -R.y;
+
+    result += vec3(.9f * texture(material.u_skybox, R).rgb);
+
     // == =====================================================
     // Our lighting is set up in 3 phases: directional, point lights and an optional flashlight
     // For each phase, a calculate function is defined that calculates the corresponding color
@@ -80,13 +99,12 @@ void main()
     // == =====================================================
     // phase 1: directional lighting
     
-    vec3 result = vec3(0);
-    for(int i = 0; i < u_DirLightAmount; i++)
-        result += CalcDirLight(dirLights[i], norm, viewDir);  
-    for(int i = 0; i < u_PointLightAmount; i++)
-        result += CalcPointLight(pointLights[i], norm, f_position, viewDir);
-    for(int i = 0; i < u_SpotLightAmount; i++)
-        result += CalcSpotLight(spotLights[i], norm, f_position, viewDir);
+//    for(int i = 0; i < u_DirLightAmount; i++)
+//        result += CalcDirLight(dirLights[i], norm, viewDir);  
+//    for(int i = 0; i < u_PointLightAmount; i++)
+//        result += CalcPointLight(pointLights[i], norm, f_position, viewDir);
+//    for(int i = 0; i < u_SpotLightAmount; i++)
+//        result += CalcSpotLight(spotLights[i], norm, f_position, viewDir);
 
     FragColor = vec4(result, 1.0);
 }
@@ -103,7 +121,7 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // combine results
-    vec3 ambient = light.ambient *material.diffuse;
+    vec3 ambient = light.ambient * material.diffuse;
     vec3 diffuse = light.diffuse * diff * material.diffuse;
     vec3 specular = light.specular * spec * material.specular;
     return (ambient + diffuse + specular);

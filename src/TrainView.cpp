@@ -189,15 +189,23 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 
-		//if (boxShader.shader == nullptr)
-		//{
-		//	boxShader.SetShader("../src/shaders/colors.vert"
-		//		, nullptr, nullptr, nullptr
-		//		, "../src/shaders/color.frag");
-		//	boxShader.SetVAO();
-		//	boxShader.SetTexture("../Images/container2.png", "../Images/specular.png");
-		//	boxShader.Init();
-		//}
+		if (skyBoxShader.shader == nullptr)
+		{
+			skyBoxShader.SetShader("../src/shaders/SkyBox.vert"
+				, nullptr, nullptr, nullptr
+				, "../src/shaders/SkyBox.frag");
+			skyBoxShader.SetVao();
+			skyBoxShader.LoadCubemap();
+		}
+
+		if (boxShader.shader == nullptr)
+		{
+			boxShader.skyboxID = skyBoxShader.cubemapTexture;
+			boxShader.SetShader("../src/shaders/colors.vert"
+				, nullptr, nullptr, nullptr
+				, "../src/shaders/color.frag");
+			boxShader.SetVao();
+		}
 
 		if (heightMapShader.shader == nullptr)
 		{
@@ -218,7 +226,7 @@ void TrainView::draw()
 
 			Lighting::DirLight* dirLight = new Lighting::DirLight;
 			dirLight->SetDirection(glm::vec3(-.2f, -1.0f, -0.3f));
-			dirLight->SetAmbient(glm::vec3(.05f, .05f, .05f));
+			dirLight->SetAmbient(glm::vec3(.1f, .1f, .1f));
 			dirLight->SetDiffuse(glm::vec3(.4f, .4f, .4f));
 			dirLight->SetSpecular(glm::vec3(.5f, .5f, .5f));
 			tw->lightingWidget->AddLightBrowser(dirLight);
@@ -269,6 +277,7 @@ void TrainView::draw()
 			spotLight->SetOuterCutOff(15.0f);
 			tw->lightingWidget->AddLightBrowser(spotLight);
 
+			heightMapShader.skyboxID = skyBoxShader.cubemapTexture;
 			heightMapShader.SetShader("../src/shaders/HeightWave.vert",
 				"../src/shaders/HeightWave.tesc", "../src/shaders/HeightWave.tese", nullptr,
 				"../src/shaders/HeightWave.frag");
@@ -285,6 +294,7 @@ void TrainView::draw()
 				std::string png = ".png";
 				heightMapShader.AddTexture((path + pickPicture + png).c_str());
 			}
+
 		}
 
 		if (lightCubeShader.shader == nullptr)
@@ -410,22 +420,30 @@ void TrainView::draw()
 	//*********************************************************************
 	glEnable(GL_LIGHTING);
 	setupObjects();
-
-	glm::vec3 viewPos = glm::vec3(arcball.eyeX, arcball.eyeY, arcball.eyeZ);
 	
 	//testShader.Draw(timer);
 
 	glClearColor(.1f, .1f, .1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+	const glm::vec3 viewPos = this->arcball.GetEyePos();
+	glm::mat4 cameraView;
+	glGetFloatv(GL_MODELVIEW_MATRIX, &cameraView[0][0]);
+	skyBoxShader.Use(viewPos);
+	glm::mat4 removeTranslateViewPos = glm::mat4(glm::mat3(cameraView)); // remove translation from the view matrix
+
+	skyBox.Draw(&skyBoxShader, removeTranslateViewPos);
+
 	glStencilMask(0x00);
 
 	heightMapShader.Use(viewPos); 
-	HeightWave.Draw(&heightMapShader);
+	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+
+	//std::cout << "view pos x : " << viewPos.x << ", y : " << viewPos.y << ", z : " << viewPos.z << std::endl;
+	//boxShader.Use(viewPos);
+	//testCube.Draw(&boxShader);
 
 	/*draw light*/ {
-
-
 		lightCubeShader.Use(viewPos);
 		Environment* instance = Environment::GetInstance();
 		Lighting::BaseLight* nowChoiceLight = nullptr;

@@ -52,6 +52,8 @@
 
 #include "3DUtils.H"
 
+#include <glm/glm.hpp>
+
 //***************************************************************************
 //
 // * if you need to pass that to OpenGL, try...
@@ -172,6 +174,12 @@ class ArcBallCam {
 		// assume the window does it
 		void getMouseNDC(float& x, float& y);
 
+		/// <summary>
+		/// get now camera pos
+		/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/Utilities/ArcBallCam.cpp
+		/// </summary>
+		/// <returns></returns>
+		glm::vec3 GetEyePos() const;
 		float				eyeX;		// in eyeX, eyeY, but this is the displacement for undoing the last
 		float				eyeY;		// addition
 		float				eyeZ;

@@ -443,10 +443,12 @@ public:
 	// are we animating the train?
 	Fl_Button*			runButton;
 	
+	void UpdataShader();
+	Fl_Button* btn_updataShader;
 	
 	Fl_Group* widget;	// all widgets, grouped for resizing ease
 	
-
+	
 	//------------------GameObejct attribute widget-----------
 #pragma region GameObjectAttributeWidget
 private:

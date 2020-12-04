@@ -447,6 +447,12 @@ public:
 	Shader* shader = nullptr;
 	VAO* Vaos = nullptr;
 
+	std::string strVert ;
+	std::string strTesc ;
+	std::string strTese ;
+	std::string strGeom ;
+	std::string strFrag ;
+
 	/// <summary>
 	/// setting constantly attribute
 	/// </summary>
@@ -457,6 +463,41 @@ public:
 		shader->setFloat("material.shininess", 32.0f);
 	}
 
+	void UpdataShader()
+	{
+		const GLchar* vert;
+		const GLchar* tesc;
+		const GLchar* tese;
+		const GLchar* geom;
+		const GLchar* frag;
+		if (strVert == "")
+			vert = nullptr;
+		else
+			vert = strVert.c_str();
+
+		if (strTesc == "")
+			tesc = nullptr;
+		else
+			tesc = strTesc.c_str();
+
+		if (strTese == "")
+			tese = nullptr;
+		else
+			tese = strTese.c_str();
+
+		if (strGeom == "")
+			geom = nullptr;
+		else
+			geom = strGeom.c_str();
+
+		if (strFrag == "")
+			frag = nullptr;
+		else
+			frag = strFrag.c_str();
+
+		shader = new Shader(vert, tesc, tese, geom, frag);
+	}
+
 	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
 	{
 		if (shader != nullptr)
@@ -464,7 +505,17 @@ public:
 			delete shader;
 			shader = nullptr;
 		}
-		shader = new Shader(vert, tesc, tese, geom, frag);
+
+		strVert = std::string(vert);
+		if(tesc != nullptr)
+			strTesc = std::string(tesc);
+		if(tese != nullptr)
+			strTese = std::string(tese);
+		if(geom != nullptr)
+			strGeom = std::string(geom);
+		strFrag = std::string(frag);
+
+		UpdataShader();
 
 		shader->Use();
 		InitShaderAttribute();

@@ -71,154 +71,131 @@ class CTrack;
 
 #define HeightWaveGridSize 64
 
-//class BoxShader
-//{
-//public:
-//	Texture2D* DiffuseMap = nullptr;
-//	Texture2D* SpecularMap = nullptr;
-//	
-//	Shader* shader = nullptr;
-//
-//	VAO Vao;
-//
-//	BoxShader()
-//	{
-//
-//	}
-//
-//	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
-//	{
-//		shader = new Shader(vert, tesc, tese, geom, frag);
-//	}
-//
-//	void SetVAO()
-//	{
-//		float vertices[] = {
-//			// positions          // normals           // texture coords
-//			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-//			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-//			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-//			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-//			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-//			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-//
-//			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-//			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
-//			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-//			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-//			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
-//			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-//
-//			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-//			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-//			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-//			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-//			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-//			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-//
-//			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-//			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
-//			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-//			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-//			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
-//			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-//
-//			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-//			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
-//			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-//			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
-//			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
-//			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
-//
-//			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
-//			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
-//			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-//			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-//			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
-//			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
-//		};
-//
-//		glGenVertexArrays(1, &this->Vao.vao);
-//		glGenBuffers(1, this->Vao.vbo);
-//
-//		glBindVertexArray(this->Vao.vao);
-//		glBindBuffer(GL_ARRAY_BUFFER, this->Vao.vbo[0]);
-//		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//
-//		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-//		glEnableVertexAttribArray(0);
-//		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-//		glEnableVertexAttribArray(1);
-//		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-//		glEnableVertexAttribArray(2);
-//	}
-//
-//	void SetTexture(const GLchar* diffuse, const GLchar* specular)
-//	{
-//		if (DiffuseMap != nullptr)
-//		{
-//			delete DiffuseMap;
-//			DiffuseMap = nullptr;
-//		}
-//		if (SpecularMap != nullptr)
-//		{
-//			delete SpecularMap;
-//			SpecularMap = nullptr;
-//		}
-//
-//		DiffuseMap = new Texture2D(diffuse);
-//		SpecularMap = new Texture2D(specular);
-//	}
-//
-//	/// <summary>
-//	/// setting material which is never change
-//	/// </summary>
-//	void Init()
-//	{
-//		shader->setInt("material.diffuse", 0);
-//		shader->setInt("material.specular", 1);
-//	}
-//
-//	void Use(glm::vec3 viewPos)
-//	{
-//		shader->Use();
-//		shader->setVec3("viewPos", viewPos);
-//		shader->setFloat("material.shininess", 32.0f);
-//
-//		Environment::GetInstance()->lights.SetShader(this->shader);
-//
-//		glm::mat4 projection;
-//		glm::mat4 view;
-//		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
-//		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
-//		shader->setMat4("projection", projection);
-//		shader->setMat4("view", view);
-//
-//		DiffuseMap->bind(0);
-//		SpecularMap->bind(1);
-//	}
-//
-//	void Draw(/*object attribute*/glm::vec3 objectPosition, GLfloat angle, glm::vec3 rotateAxis)
-//	{
-//		glBindVertexArray(this->Vao.vao);
-//		// world transformation
-//		glm::mat4 model = glm::mat4(1.0f);
-//		model = glm::translate(model, objectPosition);
-//		model = glm::rotate(model, glm::radians(angle), rotateAxis);
-//		shader->setMat4("model", model);
-//
-//		glDrawArrays(GL_TRIANGLES, 0, 36);
-//	}
-//};
+class BoxShader : public ObjectShader
+{
+public:
+	unsigned int skyboxID;
+
+	virtual void InitShaderAttribute() override
+	{
+		shader->setInt("u_skybox", skyboxID);
+	}
+
+	virtual void SetVao() override
+	{
+		if (this->Vaos == nullptr)
+			this->Vaos = new VAO;
+
+		float vertices[] = {
+			// positions          // normals           // texture coords
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+		};
+
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
+
+	virtual void Use(glm::vec3 viewPos) override
+	{
+		shader->Use();
+
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		//Environment::GetInstance()->lights.SetShader(this->shader);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+	}
+};
+
+class TestCube
+{
+public:
+	glm::vec3 Position = glm::vec3(0, 0, 0);
+
+	void Draw(BoxShader* shader)
+	{
+		glBindVertexArray(shader->Vaos->vao);
+
+		glActiveTexture(GL_TEXTURE0 + shader->skyboxID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, shader->skyboxID);
+
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, Position);
+		shader->shader->setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
 
 class HeightMapShader : public ObjectShader
 {
 public:
+	unsigned int skyboxID;
 	virtual void InitShaderAttribute() override
 	{
-		shader->setVec3("material.diffuse", .24f, .6f, 1);
-		shader->setVec3("material.specular", .3f, .3f, 1);
+		shader->setVec3("material.diffuse", .0f, .0f, .0f);
+		shader->setVec3("material.specular", .0f, .0f, .0f);
 		shader->setFloat("material.shininess", 32.0f);
+
+		shader->setInt("material.u_skybox", 0);
 	}
 
 	virtual void Use(glm::vec3 viewPos) override
@@ -248,12 +225,16 @@ public:
 	/// have to use shader first
 	/// </summary>
 	/// <param name="aShader"></param>
-	virtual void Draw(ObjectShader* aShader)
+	virtual void Draw(ObjectShader* aShader, unsigned int reflectSkyTextureID)
 	{
 		aShader->textures[timer % WavePictureAmount]->bind(0);
 		glUniform1i(glGetAttribLocation(aShader->shader->ID, "u_heightMap"), 0);
 
 		glBindVertexArray(aShader->Vaos->vao);
+
+		glActiveTexture(GL_TEXTURE0 + reflectSkyTextureID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
+
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, Position);
@@ -508,6 +489,146 @@ public:
 	}
 };
 
+class SkyBoxShader : public ObjectShader
+{
+public:
+	std::vector<std::string> faces
+	{
+		"../Images/skybox/right.jpg",
+		"../Images/skybox/left.jpg",
+		"../Images/skybox/top.jpg",
+		"../Images/skybox/bottom.jpg",
+		"../Images/skybox/front.jpg",
+		"../Images/skybox/back.jpg"
+	};
+	unsigned int cubemapTexture;
+	// loads a cubemap texture from 6 individual texture faces
+	// order:
+	// +X (right)
+	// -X (left)
+	// +Y (top)
+	// -Y (bottom)
+	// +Z (front) 
+	// -Z (back)
+	// -------------------------------------------------------
+	void LoadCubemap()
+	{
+		glGenTextures(1, &cubemapTexture);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+
+		int width, height, nrChannels;
+		for (unsigned int i = 0; i < faces.size(); i++)
+		{
+			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+			if (data)
+			{
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				stbi_image_free(data);
+			}
+			else
+			{
+				std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+				stbi_image_free(data);
+			}
+		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+
+	virtual void SetVao()override
+	{
+		if (this->Vaos == nullptr)
+			this->Vaos = new VAO;
+
+		float skyboxVertices[] = {
+			// positions          
+			-1.0f,  1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f, -1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f,
+			-1.0f, -1.0f,  1.0f,
+
+			-1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f, -1.0f,
+			 1.0f,  1.0f,  1.0f,
+			 1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f,  1.0f,
+			-1.0f,  1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f, -1.0f,
+			 1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f,  1.0f,
+			 1.0f, -1.0f,  1.0f
+		};
+
+		// skybox VAO
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	}
+
+	virtual void InitShaderAttribute() override
+	{
+		shader->setInt("skybox", 0);
+	}
+
+	virtual void Use(glm::vec3 viewPos) override
+	{
+		glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+		shader->Use();
+	}
+};
+class SkyBox
+{
+public:
+
+	void Draw(SkyBoxShader* aShader,  glm::mat4 view)
+	{
+		glm::mat4 projection;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		aShader->shader->setMat4("u_projection", projection);
+		aShader->shader->setMat4("u_view", view);
+
+		// skybox cube
+		glBindVertexArray(aShader->Vaos->vao);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, aShader->cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDepthFunc(GL_LESS); // set depth function back to default
+	}
+};
+
 class TrainView : public Fl_Gl_Window
 {
 	public:
@@ -535,6 +656,12 @@ class TrainView : public Fl_Gl_Window
 
 		//set ubo
 		void setUBO();
+
+		void UpdataAllShader()
+		{
+			heightMapShader.UpdataShader();
+			boxShader.UpdataShader();
+		}
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected
@@ -565,5 +692,9 @@ class TrainView : public Fl_Gl_Window
 		HeightMapShader heightMapShader;
 		HeightMapWave HeightWave;
 
-		float lightid;
+		SkyBoxShader skyBoxShader;
+		SkyBox skyBox;
+
+		BoxShader boxShader;
+		TestCube testCube;
 };

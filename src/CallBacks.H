@@ -33,6 +33,8 @@ void runButtonCB(TrainWindow* tw);
 
 void ChoiceWhichOAttributeCB(Fl_Button* w, TrainWindow* tw);
 
+void UpdataShaderCB(Fl_Button* w, TrainWindow* tw);
+
 //------------------------------------------------------------------------
 //                         LightingWidget call back
 //lightlist browser choose which light

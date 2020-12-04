@@ -63,6 +63,7 @@
 #include <Fl/Fl.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <Fl/Fl_Double_Window.h>
 #pragma warning(pop)
 
@@ -222,6 +223,22 @@ getMouseNDC(float& x, float& y)
 
 	x = (mx / wd) * 2.0f - 1.f;
 	y = (my / hd) * 2.0f - 1.f;
+}
+
+glm::vec3 ArcBallCam::GetEyePos() const
+{
+	HMatrix m;
+	Quat qAll = now * start;
+	qAll.x *= -1;
+	qAll.y *= -1;
+	qAll.z *= -1;
+	qAll = qAll.conjugate();
+	qAll.toMatrix(m);
+	glm::mat4 mat = glm::make_mat4((float*)m);
+
+	glm::vec4 src = glm::vec4(this->eyeX, this->eyeY, this->eyeZ, 1.0f);
+	glm::vec4 ret = mat * src;
+	return glm::vec3(ret.x, ret.y, ret.z);
 }
 
 //**************************************************************************

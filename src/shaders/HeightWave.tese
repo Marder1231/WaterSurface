@@ -23,7 +23,7 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 }
 void main(void)
 {
-	float amplitude = 20;
+	float amplitude = 24.6;
 	float speed = 2;
 	float waveLength = 10;
 

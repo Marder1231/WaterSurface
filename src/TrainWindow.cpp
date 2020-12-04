@@ -63,6 +63,9 @@ TrainWindow(const int x, const int y)
 		runButton = new Fl_Button(605,pty,60,20,"Run");
 		togglify(runButton);
 		
+		btn_updataShader = new Fl_Button(605, pty + 24, 60, 20, "Updata Shader");
+		btn_updataShader->callback((Fl_Callback*)UpdataShaderCB, this);
+
 		ChoiceWhichGameObjectAttribute = new Fl_Choice(700, pty, 60, 24);
 		ChoiceWhichGameObjectAttribute->add("lighting");
 		ChoiceWhichGameObjectAttribute->add("Object");
@@ -108,6 +111,12 @@ togglify(Fl_Button* b, int val)
 	b->callback((Fl_Callback*)damageCB,this);
 }
 
+void TrainWindow::UpdataShader()
+{
+	//$$$ updata all shader
+	trainView->UpdataAllShader();
+}
+
 #pragma region LightingWidget
 void LightingWidget::AddLightBrowser(Lighting::BaseLight* _light)
 {
@@ -119,7 +128,6 @@ void LightingWidget::AddLightBrowser(Lighting::BaseLight* _light)
 	else if (_light->Type == Lighting::EmLightType::Spot)
 		strLightType = "Spot : ";
 
-	std::cout << _light->ID <<std::endl;
 	LightListIDs.push_back(_light->ID);
 	LightList->add( (strLightType + std::to_string(_light->ID)).c_str() );
 }

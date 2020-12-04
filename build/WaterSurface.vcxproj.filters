@@ -125,6 +125,12 @@
     <None Include="..\src\shaders\HeightWave.tese">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\SkyBox.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\SkyBox.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

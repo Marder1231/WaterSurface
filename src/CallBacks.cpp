@@ -71,7 +71,10 @@ void ChoiceWhichOAttributeCB(Fl_Button* w, TrainWindow* tw)
 	tw->ShowWhichObjectAttribute();
 }
 
-
+void UpdataShaderCB(Fl_Button* w, TrainWindow* tw)
+{
+	tw->UpdataShader();
+}
 #pragma region LightWidget
 
 void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw)
