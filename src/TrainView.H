@@ -71,7 +71,7 @@ class CTrack;
 
 #define HeightWaveGridSize 64
 
-class BoxShader : public ObjectShader
+class SkyboxCubeShader : public ObjectShader
 {
 public:
 	unsigned int skyboxID;
@@ -81,7 +81,7 @@ public:
 		shader->setInt("u_skybox", skyboxID);
 	}
 
-	virtual void SetVao() override
+	virtual void SetVAO() override
 	{
 		if (this->Vaos == nullptr)
 			this->Vaos = new VAO;
@@ -153,7 +153,7 @@ public:
 		shader->setVec3("viewPos", viewPos);
 		shader->setFloat("material.shininess", 32.0f);
 
-		//Environment::GetInstance()->lights.SetShader(this->shader);
+		Environment::GetInstance()->lights.SetShader(this->shader);
 
 		glm::mat4 projection;
 		glm::mat4 view;
@@ -163,13 +163,12 @@ public:
 		shader->setMat4("view", view);
 	}
 };
-
-class TestCube
+class SkyboxTestCube
 {
 public:
 	glm::vec3 Position = glm::vec3(0, 0, 0);
 
-	void Draw(BoxShader* shader)
+	void Draw(SkyboxCubeShader* shader)
 	{
 		glBindVertexArray(shader->Vaos->vao);
 
@@ -185,14 +184,120 @@ public:
 	}
 };
 
+class CubeShader : public ObjectShader
+{
+public:
+	virtual void SetVAO() override
+	{
+		if (this->Vaos == nullptr)
+			this->Vaos = new VAO;
+
+		float vertices[] = {
+			// positions          // normals           // texture coords
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f,  1.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f,  1.0f
+		};
+
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+	}
+
+	virtual void Use(glm::vec3 viewPos) override
+	{
+		shader->Use();
+
+		shader->setVec3("viewPos", viewPos);
+		shader->setFloat("material.shininess", 32.0f);
+
+		Environment::GetInstance()->lights.SetShader(this->shader);
+
+		glm::mat4 projection;
+		glm::mat4 view;
+		glGetFloatv(GL_PROJECTION_MATRIX, &projection[0][0]);
+		glGetFloatv(GL_MODELVIEW_MATRIX, &view[0][0]);
+		shader->setMat4("projection", projection);
+		shader->setMat4("view", view);
+
+		BindTextures();
+	}
+};
+class Cube
+{
+public:
+	glm::vec3 Position = glm::vec3(0, 0, 0);
+
+	void Draw(CubeShader* shader)
+	{
+		glBindVertexArray(shader->Vaos->vao);
+
+		// world transformation
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::translate(model, Position);
+		shader->shader->setMat4("model", model);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+};
+
+
 class HeightMapShader : public ObjectShader
 {
 public:
 	unsigned int skyboxID;
 	virtual void InitShaderAttribute() override
 	{
-		shader->setVec3("material.diffuse", .0f, .0f, .0f);
-		shader->setVec3("material.specular", .0f, .0f, .0f);
+		shader->setVec3("material.diffuse", .12f, .26f, .624f);
+		shader->setVec3("material.specular", .12f, .26f, .624f);
 		shader->setFloat("material.shininess", 32.0f);
 
 		shader->setInt("material.u_skybox", 0);
@@ -207,6 +312,7 @@ public:
 		//加入光效
 		Environment::GetInstance()->lights.SetShader(shader);
 
+		shader->setVec3("RippleCenter", glm::vec3(0, 0, 0));
 		//轉到螢幕座標
 		SetModelView7ProjectionMatrix();
 	}
@@ -234,6 +340,8 @@ public:
 
 		glActiveTexture(GL_TEXTURE0 + reflectSkyTextureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
+
+		aShader->shader->setFloat("u_time", timer%10);
 
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -482,7 +590,7 @@ public:
 
 		// render the loaded model
 		glm::mat4 modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -5.0f, 0.0f)); // translate it down so it's at the center of the scene
 		modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 		shader->setMat4("model", modelMat);
 		model->Draw(*shader);
@@ -538,7 +646,7 @@ public:
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	}
 
-	virtual void SetVao()override
+	virtual void SetVAO()override
 	{
 		if (this->Vaos == nullptr)
 			this->Vaos = new VAO;
@@ -629,6 +737,107 @@ public:
 	}
 };
 
+class ScreenShader : public ObjectShader
+{
+public:
+	FBO* Fbos = nullptr;
+
+	virtual void InitShaderAttribute() override
+	{
+
+	}
+
+	virtual void SetVAO() override
+	{
+		if (this->Vaos == nullptr)
+			this->Vaos = new VAO;
+
+		float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+			// positions   // texCoords
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			-1.0f, -1.0f,  0.0f, 0.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+
+			-1.0f,  1.0f,  0.0f, 1.0f,
+			 1.0f, -1.0f,  1.0f, 0.0f,
+			 1.0f,  1.0f,  1.0f, 1.0f
+		};
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	}
+
+	void SetFBO()
+	{
+		if (this->Fbos == nullptr)
+			this->Fbos = new FBO;
+
+		glGenFramebuffers(1, &this->Fbos->fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+		// create a color attachment texture
+		glGenTextures(1, this->Fbos->textures);
+		glBindTexture(GL_TEXTURE_2D, this->Fbos->textures[0]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 590, 590, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, this->Fbos->textures[0], 0);
+		// create a renderbuffer object for depth and stencil attachment (we won't be sampling these)
+		glGenRenderbuffers(1, &this->Fbos->rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590); // use a single renderbuffer object for both a depth AND stencil buffer.
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->rbo); // now actually attach it
+		// now that we actually created the framebuffer and added all attachments we want to check if it is actually complete now
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void BindFBO()
+	{
+		// render
+		// ------
+		// bind to framebuffer and draw scene as we normally would to color texture 
+		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+
+		// make sure we clear the framebuffer's content
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void  UnBindFBO()
+	{
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		// disable depth test so screen-space quad isn't discarded due to depth test.
+		glDisable(GL_DEPTH_TEST); 
+		// clear all relevant buffers
+		glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // set clear color to white (not really necessary actually, since we won't be able to see behind the quad anyways)
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	}
+
+	virtual void Draw(glm::vec3 _)
+	{
+		this->shader->Use();
+
+		glBindVertexArray(this->Vaos->vao);
+
+		this->shader->setInt("u_screenTexture", this->Fbos->textures[0]);
+		glActiveTexture(GL_TEXTURE_2D + this->Fbos->textures[0]);
+		glBindTexture(GL_TEXTURE_2D, this->Fbos->textures[0]);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glBindVertexArray(0);
+		glEnable(GL_DEPTH_TEST);
+	}
+};
+
 class TrainView : public Fl_Gl_Window
 {
 	public:
@@ -695,6 +904,11 @@ class TrainView : public Fl_Gl_Window
 		SkyBoxShader skyBoxShader;
 		SkyBox skyBox;
 
-		BoxShader boxShader;
-		TestCube testCube;
+		SkyboxCubeShader boxShader;
+		SkyboxTestCube testCube;
+
+		CubeShader cubeShader;
+		Cube cube;
+
+		ScreenShader screenShader;
 };

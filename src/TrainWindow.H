@@ -171,7 +171,7 @@ public:
 
 		//$$$ bug LightList Browers already delete, but it also display
 		//remove this light at LightList
-		LightList->remove(nowChooseLightIndex);
+		LightList->remove(nowChooseLightIndex+1);
 		LightListIDs.erase(LightListIDs.begin() + nowChooseLightIndex);
 
 		nowChooseLightIndex = -1;

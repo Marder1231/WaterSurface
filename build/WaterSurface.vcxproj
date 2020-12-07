@@ -330,12 +330,18 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\HeightWave.vert" />
     <None Include="..\src\shaders\lightCbue.vert" />
     <None Include="..\src\shaders\lightCube.frag" />
+    <None Include="..\src\shaders\model.frag" />
+    <None Include="..\src\shaders\model.vert" />
     <None Include="..\src\shaders\RayCast.frag" />
     <None Include="..\src\shaders\RayCast.vert" />
+    <None Include="..\src\shaders\ScreenShader.frag" />
+    <None Include="..\src\shaders\ScreenShader.vert" />
     <None Include="..\src\shaders\SkyBox.frag" />
     <None Include="..\src\shaders\SkyBox.vert" />
     <None Include="..\src\shaders\test.tesc" />
     <None Include="..\src\shaders\test.tese" />
+    <None Include="..\src\shaders\Toon.frag" />
+    <None Include="..\src\shaders\Toon.Vert" />
     <None Include="..\src\shaders\wave.frag" />
     <None Include="..\src\shaders\wave.vert" />
     <None Include="..\src\shaders\waveTest.frag" />
@@ -368,8 +374,6 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="D:\Practicum\CG\WaterSurface\include\glad4.6\src\glad.c" />
     <ClInclude Include="D:\Practicum\CG\WaterSurface\src\std_image.h" />
     <ClCompile Include="D:\Practicum\CG\WaterSurface\src\RenderUtilities\Texture.cpp" />
-    <None Include="model.frag" />
-    <None Include="model.vert" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="D:\Practicum\CG\WaterSurface\build\ZERO_CHECK.vcxproj">

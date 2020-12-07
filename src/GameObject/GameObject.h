@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <vector>
 #include <map>
 
 #include "RenderUtilities/BufferObject.h"
@@ -421,6 +422,53 @@ public:
 				shader->setInt("u_DirLightAmount", dirCounter);
 				shader->setInt("u_SpotLightAmount", spotCounter);
 			}
+
+			/*at liast setting once time*/ 
+			[=](Shader* _shader) mutable -> void
+			{
+				if (dirCounter == 0)
+				{
+					std::string lightName = dirLightInShaderName + "[";
+					lightName += std::to_string(dirCounter);
+					lightName += "].";
+
+					shader->setVec3((lightName + "direction"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "ambient"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "diffuse"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "specular"), glm::vec3(0, 0, 0));
+				}
+				if (pointCounter == 0)
+				{
+					std::string lightName = pointLightInShaderName + "[";
+					lightName += std::to_string(pointCounter);
+					lightName += "].";
+
+					shader->setVec3((lightName + "position"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "ambient"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "diffuse"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "specular"), glm::vec3(0, 0, 0));
+					shader->setFloat((lightName + "constant"), float(0));
+					shader->setFloat((lightName + "linear"), float(0));
+					shader->setFloat((lightName + "quadratic"), float(0));
+				}
+				if (spotCounter == 0)
+				{
+					std::string lightName = spotLightInShaderName + "[";
+					lightName += std::to_string(spotCounter);
+					lightName += "].";
+
+					shader->setVec3((lightName + "position"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "direction"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "ambient"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "diffuse"), glm::vec3(0, 0, 0));
+					shader->setVec3((lightName + "specular"), glm::vec3(0, 0, 0));
+					shader->setFloat((lightName + "constant"), float(0));
+					shader->setFloat((lightName + "linear"), float(0));
+					shader->setFloat((lightName + "quadratic"), float(0));
+					shader->setFloat((lightName + "cutOff"), glm::cos(glm::radians(0.0f)));
+					shader->setFloat((lightName + "outerCutOff"), glm::cos(glm::radians(0.0f)));
+				}
+			} (shader);
 		}
 
 		~Lights()
@@ -465,6 +513,12 @@ public:
 
 	void UpdataShader()
 	{
+		if (shader != nullptr)
+		{
+			delete shader;
+			shader = nullptr;
+		}
+
 		const GLchar* vert;
 		const GLchar* tesc;
 		const GLchar* tese;
@@ -496,16 +550,13 @@ public:
 			frag = strFrag.c_str();
 
 		shader = new Shader(vert, tesc, tese, geom, frag);
+
+		shader->Use();
+		InitShaderAttribute();
 	}
 
 	void SetShader(const GLchar* vert, const GLchar* tesc, const GLchar* tese, const char* geom, const char* frag)
 	{
-		if (shader != nullptr)
-		{
-			delete shader;
-			shader = nullptr;
-		}
-
 		strVert = std::string(vert);
 		if(tesc != nullptr)
 			strTesc = std::string(tesc);
@@ -516,9 +567,6 @@ public:
 		strFrag = std::string(frag);
 
 		UpdataShader();
-
-		shader->Use();
-		InitShaderAttribute();
 	}
 
 	void AddTexture(const GLchar* path)
@@ -532,7 +580,7 @@ public:
 	/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/TrainView.cpp  
 	///				aSurface::generateVAO()
 	/// </summary>
-	virtual void SetVao()
+	virtual void SetVAO()
 	{
 		if (this->Vaos == nullptr)
 			Vaos = new VAO;

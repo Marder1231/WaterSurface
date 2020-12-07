@@ -9,10 +9,10 @@ out vec2 e_textCoords[];
 
 void main(void)
 {
-	gl_TessLevelInner[0] = 2460;
-	gl_TessLevelOuter[0] = 2460;
-	gl_TessLevelOuter[1] = 2460;
-	gl_TessLevelOuter[2] = 2460;
+	gl_TessLevelInner[0] = 24600;
+	gl_TessLevelOuter[0] = 24600;
+	gl_TessLevelOuter[1] = 24600;
+	gl_TessLevelOuter[2] = 24600;
 
 	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 	e_position[gl_InvocationID] = c_position[gl_InvocationID];

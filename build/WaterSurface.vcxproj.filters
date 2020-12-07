@@ -83,12 +83,6 @@
     <None Include="..\src\shaders\lightCube.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="model.vert">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="model.frag">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="..\src\shaders\wave.frag">
       <Filter>shaders</Filter>
     </None>
@@ -129,6 +123,24 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="..\src\shaders\SkyBox.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\model.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\model.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\Toon.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\Toon.Vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\ScreenShader.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\ScreenShader.vert">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

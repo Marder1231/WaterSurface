@@ -65,32 +65,58 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 f_position, vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 f_position, vec3 viewDir);
 
+float uniformQuantization(float f, int step)
+{
+    f*=256;
+    float q = 256.0 / step;
+    int interval = int(f / q);
+
+    f = interval * q;
+
+    return f / 256.0;
+}
+vec3 ToonShader(vec3 originColor)
+{
+    float newPixel[3] = {
+        uniformQuantization(originColor.x, 8),
+        uniformQuantization(originColor.y, 8),
+        uniformQuantization(originColor.z, 4),
+    };
+
+    return vec3(newPixel[0], newPixel[1], newPixel[2]);
+}
+
 void main()
 {    
     // properties
-    vec3 dx = dFdx(vec3(f_textCoords, 1));
-    vec3 dy = dFdy(vec3(f_textCoords, 1));
+    vec3 dx = dFdx(f_position);
+    vec3 dy = dFdy(f_position);
     vec3 norm = normalize(cross(dx, dy));
     vec3 viewDir = normalize(u_cameraPos - f_position);
     
+    vec3 dxTexture = dFdx(vec3(f_textCoords, 1));
+    vec3 dyTexture = dFdy(vec3(f_textCoords, 1));
+    vec3 normTexture = normalize(cross(dxTexture, dyTexture));
+
     float air = 1.00f;
     float water = 1.33f;
     float ice = 1.309f;
     float glass = 1.52f;
     float diamond = 2.42f;
-    
     //          from / into;
-    float ratio = air / glass;
-    vec3 R = refract(-viewDir, norm, ratio);
-    vec3 result = vec3(.1f * texture(material.u_skybox, R).rgb );
+    float ratio = air / water;
 
-    R = reflect(viewDir, norm);
-    R.z = -R.z;
-    R.x = -R.x;
-    R.y = -R.y;
+    vec3 result = vec3(0);
+    vec3 R;
+   
+    R = refract(-viewDir, norm, ratio);
+//    R.x = -R.x;
+//    R.z = -R.z;
+    result += vec3(1.0f * texture(material.u_skybox, R).rgb );
 
-    result += vec3(.9f * texture(material.u_skybox, R).rgb);
-
+    R = reflect(-viewDir, norm);
+    result += vec3(.5f * texture(material.u_skybox, R).rgb);
+//    result = norm;
     // == =====================================================
     // Our lighting is set up in 3 phases: directional, point lights and an optional flashlight
     // For each phase, a calculate function is defined that calculates the corresponding color
@@ -106,7 +132,7 @@ void main()
 //    for(int i = 0; i < u_SpotLightAmount; i++)
 //        result += CalcSpotLight(spotLights[i], norm, f_position, viewDir);
 
-    FragColor = vec4(result, 1.0);
+    FragColor = vec4((result) , 1.0) ;
 }
 
 // calculates the color when using a directional light.
