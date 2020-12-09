@@ -143,6 +143,21 @@
     <None Include="..\src\shaders\ScreenShader.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\Line.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\Line.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\BSpline.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\BSpline.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\BSpline.geom">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -24,7 +24,7 @@ namespace Lighting
 		Spot = 2,
 	};
 
-	#pragma region Light_Interface
+#pragma region Light_Interface
 	class BaseLight
 	{
 		glm::vec3 ambient;
@@ -116,7 +116,7 @@ namespace Lighting
 		virtual void SetOuterCutOff(float) = 0;
 		virtual float& GetOuterCutOff() = 0;
 	};
-	#pragma endregion Light_Interface
+	#pragma endregion
 
 	class DirLight : public BaseLight, public IDir
 	{
@@ -491,9 +491,27 @@ public:
 class ObjectShader
 {
 public:
+	/// <summary>
+	/// setting constantly attribute
+	/// </summary>
+	virtual void InitShaderAttribute() = 0;
+
+	virtual void SetVAO() = 0;
+
+	/// <summary>
+	/// setting shader attribute and bind texture
+	/// </summary>
+	virtual void Use(glm::vec3 viewPos) = 0;
+
+	/// <summary>
+	/// if SetVAO change, this function maybe change
+	/// </summary>
+	virtual void GLDraw() = 0;
+public:
 	std::vector<Texture2D*> textures;
 	Shader* shader = nullptr;
 	VAO* Vaos = nullptr;
+	FBO* Fbos = nullptr;
 
 	std::string strVert ;
 	std::string strTesc ;
@@ -501,15 +519,6 @@ public:
 	std::string strGeom ;
 	std::string strFrag ;
 
-	/// <summary>
-	/// setting constantly attribute
-	/// </summary>
-	virtual void InitShaderAttribute()
-	{
-		shader->setVec3("material.diffuse", 1, 1, 1);
-		shader->setVec3("material.specular", 1, 1, 1);
-		shader->setFloat("material.shininess", 32.0f);
-	}
 
 	void UpdataShader()
 	{
@@ -575,129 +584,6 @@ public:
 		textures.push_back(texture);
 	}
 	
-	/// <summary>
-	/// create data : 2020.12.01 - 17:43
-	/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/TrainView.cpp  
-	///				aSurface::generateVAO()
-	/// </summary>
-	virtual void SetVAO()
-	{
-		if (this->Vaos == nullptr)
-			Vaos = new VAO;
-
-		const int clipAmount = 1600;
-
-		float size = 100;
-
-		float sourceVertices[] = {
-			-size ,0.0f , -size,
-			-size ,0.0f , size ,
-			size ,0.0f ,size ,
-			size ,0.0f ,-size };
-		GLfloat  sourceNormal[] = {
-			0.0f, 1.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-			0.0f, 1.0f, 0.0f,
-			0.0f, 1.0f, 0.0f };
-		GLuint sourceElement[] = {
-			0, 1, 2,
-			0, 2, 3 };
-
-		int length = ceil(sqrt(clipAmount));
-
-		std::vector<float> vertices;
-		std::vector<float> textureCoords;
-		std::vector<int> elements;
-
-		GLfloat VzInc = (sourceVertices[5] - sourceVertices[2]) / length;
-		GLfloat VzStart = sourceVertices[2];
-		GLfloat VzCurr = VzStart;
-		GLfloat TyInc = 1.0f / length;
-		GLfloat TyStart = 0.0f;
-		GLfloat TyCurr = TyStart;
-
-		for (int i = 0; i < length; i++)
-		{
-			GLfloat VxInc = (sourceVertices[6] - sourceVertices[0]) / length;
-			GLfloat VxStart = sourceVertices[0];
-			GLfloat VxCurr = VxStart;
-
-			GLfloat TxInc = 1.0f / length;
-			GLfloat TxStart = 0.0f;
-			GLfloat TxCurr = TxStart;
-
-			for (int j = 0; j < length; j++)
-			{
-				vertices.push_back(VxCurr);
-				vertices.push_back(sourceVertices[1]);
-				vertices.push_back(VzCurr);
-
-				vertices.push_back(VxCurr);
-				vertices.push_back(sourceVertices[4]);
-				vertices.push_back(VzCurr + VzInc);
-
-				vertices.push_back(VxCurr + VxInc);
-				vertices.push_back(sourceVertices[7]);
-				vertices.push_back(VzCurr + VzInc);
-
-				vertices.push_back(VxCurr + VxInc);
-				vertices.push_back(sourceVertices[10]);
-				vertices.push_back(VzCurr);
-
-				textureCoords.push_back(TxCurr);
-				textureCoords.push_back(TyCurr);
-
-				textureCoords.push_back(TxCurr);
-				textureCoords.push_back(TyCurr + TyInc);
-
-				textureCoords.push_back(TxCurr + TxInc);
-				textureCoords.push_back(TyCurr + TyInc);
-
-				textureCoords.push_back(TxCurr + TxInc);
-				textureCoords.push_back(TyCurr);
-
-				int idx = i * length + j;
-				elements.push_back(sourceElement[0] + (idx * 4));
-				elements.push_back(sourceElement[1] + (idx * 4));
-				elements.push_back(sourceElement[2] + (idx * 4));
-
-				elements.push_back(sourceElement[3] + (idx * 4));
-				elements.push_back(sourceElement[4] + (idx * 4));
-				elements.push_back(sourceElement[5] + (idx * 4));
-
-				VxCurr += VxInc;
-				TxCurr += TxInc;
-			}
-
-			VzCurr += VzInc;
-			TyCurr += TyInc;
-		}
-
-		this->Vaos = new VAO;
-		this->Vaos->element_amount = elements.size();
-
-		glGenVertexArrays(1, &this->Vaos->vao);
-		glGenBuffers(2, this->Vaos->vbo);
-		glGenBuffers(1, &this->Vaos->ebo);
-
-		glBindVertexArray(this->Vaos->vao);
-
-		// Position attribute
-		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(0);
-
-		// Texture Coordinate attribute
-		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[1]);
-		glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(GLfloat), textureCoords.data(), GL_STATIC_DRAW);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(1);
-
-		//Element attribute
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_STATIC_DRAW);
-	}
 
 	/// <summary>
 	/// setting shader model view matrix and proection matrix
@@ -720,29 +606,17 @@ public:
 		}
 	}
 
-	/// <summary>
-	/// setting shader attribute and bind texture
-	/// </summary>
-	virtual void Use(glm::vec3 viewPos)
+
+	virtual void Unuse()
 	{
-		shader->Use();
-		shader->setVec3("viewPos", viewPos);
+		glBindVertexArray(0);
 
-		//加入光效
-		Environment::GetInstance()->lights.SetShader(shader);
+		for (int i = 0; i < textures.size(); i++)
+		{
+			Texture2D::unbind(i);
+		}
 
-		//轉到螢幕座標
-		SetModelView7ProjectionMatrix();
-
-		BindTextures();
-	}
-
-	/// <summary>
-	/// if SetVAO change, this function maybe change
-	/// </summary>
-	virtual void GLDraw()
-	{
-		glDrawElements(GL_PATCHES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
+		shader->Unuse();
 	}
 
 	~ObjectShader()
@@ -750,6 +624,11 @@ public:
 		glDeleteVertexArrays(1, &this->Vaos->vao);
 		glDeleteBuffers(4, this->Vaos->vbo);
 		glDeleteBuffers(1, &this->Vaos->ebo);
+
+		if (this->Fbos != nullptr)
+		{
+			glDeleteFramebuffers(1, &this->Fbos->fbo);
+		}
 
 		delete Vaos;
 		delete shader;

@@ -67,6 +67,7 @@
 #include <Fl/Fl_Double_Window.h>
 #pragma warning(pop)
 
+#include <iostream>
 #include "stdio.h"
 
 //**************************************************************************
@@ -105,7 +106,6 @@ setup(Fl_Gl_Window* _wind, float _fieldOfView, float _eyeZ,
 	isx			= _isx;
 	isy			= _isy;
 	isz			= _isz;
-
 
 	reset();
 	spin(isx,isy,isz);
@@ -192,7 +192,9 @@ handle(int e)
 			break;
 		case FL_MOUSEWHEEL: {
 			float zamt = (Fl::event_dy() > 0) ? 1.1f : 1/1.1f;
+
 			eyeZ *= zamt;
+
 			wind->damage(1);
 			return 1;
 			};

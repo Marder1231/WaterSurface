@@ -65,6 +65,7 @@ class CTrack;
 
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
+#include "Utilities/Pnt3f.H"
 
 #include "../build/Model.h"
 #include "../src/GameObject/GameObject.h"
@@ -162,6 +163,11 @@ public:
 		shader->setMat4("projection", projection);
 		shader->setMat4("view", view);
 	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 };
 class SkyboxTestCube
 {
@@ -180,7 +186,7 @@ public:
 		model = glm::translate(model, Position);
 		shader->shader->setMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		shader->GLDraw();
 	}
 };
 
@@ -270,6 +276,16 @@ public:
 
 		BindTextures();
 	}
+
+	virtual void InitShaderAttribute() override
+	{
+
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 };
 class Cube
 {
@@ -285,7 +301,7 @@ public:
 		model = glm::translate(model, Position);
 		shader->shader->setMat4("model", model);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		shader->GLDraw();
 	}
 };
 
@@ -303,6 +319,130 @@ public:
 		shader->setInt("material.u_skybox", 0);
 	}
 
+	/// <summary>
+	/// create data : 2020.12.01 - 17:43
+	/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/TrainView.cpp  
+	///				aSurface::generateVAO()
+	/// </summary>
+	virtual void SetVAO() override
+	{
+		if (this->Vaos == nullptr)
+			Vaos = new VAO;
+
+		const int clipAmount = 1600;
+
+		float size = 100;
+
+		float sourceVertices[] = {
+			-size ,0.0f , -size,
+			-size ,0.0f , size ,
+			size ,0.0f ,size ,
+			size ,0.0f ,-size };
+		GLfloat  sourceNormal[] = {
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f,
+			0.0f, 1.0f, 0.0f };
+		GLuint sourceElement[] = {
+			0, 1, 2,
+			0, 2, 3 };
+
+		int length = ceil(sqrt(clipAmount));
+
+		std::vector<float> vertices;
+		std::vector<float> textureCoords;
+		std::vector<int> elements;
+
+		GLfloat VzInc = (sourceVertices[5] - sourceVertices[2]) / length;
+		GLfloat VzStart = sourceVertices[2];
+		GLfloat VzCurr = VzStart;
+		GLfloat TyInc = 1.0f / length;
+		GLfloat TyStart = 0.0f;
+		GLfloat TyCurr = TyStart;
+
+		for (int i = 0; i < length; i++)
+		{
+			GLfloat VxInc = (sourceVertices[6] - sourceVertices[0]) / length;
+			GLfloat VxStart = sourceVertices[0];
+			GLfloat VxCurr = VxStart;
+
+			GLfloat TxInc = 1.0f / length;
+			GLfloat TxStart = 0.0f;
+			GLfloat TxCurr = TxStart;
+
+			for (int j = 0; j < length; j++)
+			{
+				vertices.push_back(VxCurr);
+				vertices.push_back(sourceVertices[1]);
+				vertices.push_back(VzCurr);
+
+				vertices.push_back(VxCurr);
+				vertices.push_back(sourceVertices[4]);
+				vertices.push_back(VzCurr + VzInc);
+
+				vertices.push_back(VxCurr + VxInc);
+				vertices.push_back(sourceVertices[7]);
+				vertices.push_back(VzCurr + VzInc);
+
+				vertices.push_back(VxCurr + VxInc);
+				vertices.push_back(sourceVertices[10]);
+				vertices.push_back(VzCurr);
+
+				textureCoords.push_back(TxCurr);
+				textureCoords.push_back(TyCurr);
+
+				textureCoords.push_back(TxCurr);
+				textureCoords.push_back(TyCurr + TyInc);
+
+				textureCoords.push_back(TxCurr + TxInc);
+				textureCoords.push_back(TyCurr + TyInc);
+
+				textureCoords.push_back(TxCurr + TxInc);
+				textureCoords.push_back(TyCurr);
+
+				int idx = i * length + j;
+				elements.push_back(sourceElement[0] + (idx * 4));
+				elements.push_back(sourceElement[1] + (idx * 4));
+				elements.push_back(sourceElement[2] + (idx * 4));
+
+				elements.push_back(sourceElement[3] + (idx * 4));
+				elements.push_back(sourceElement[4] + (idx * 4));
+				elements.push_back(sourceElement[5] + (idx * 4));
+
+				VxCurr += VxInc;
+				TxCurr += TxInc;
+			}
+
+			VzCurr += VzInc;
+			TyCurr += TyInc;
+		}
+
+		this->Vaos = new VAO;
+		this->Vaos->element_amount = elements.size();
+
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(2, this->Vaos->vbo);
+		glGenBuffers(1, &this->Vaos->ebo);
+
+		glBindVertexArray(this->Vaos->vao);
+
+		// Position attribute
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+		// Texture Coordinate attribute
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(GLfloat), textureCoords.data(), GL_STATIC_DRAW);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+
+		//Element attribute
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_STATIC_DRAW);
+	}
+
 	virtual void Use(glm::vec3 viewPos) override
 	{
 		shader->Use();
@@ -315,6 +455,11 @@ public:
 		shader->setVec3("RippleCenter", glm::vec3(0, 0, 0));
 		//Âà¨ì¿Ã¹õ®y¼Ð
 		SetModelView7ProjectionMatrix();
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawElements(GL_PATCHES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
 	}
 };
 class HeightMapWave
@@ -351,6 +496,8 @@ public:
 
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
 		aShader->GLDraw();
+
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
 	void WaveGoGOo(int _speed)
@@ -716,6 +863,11 @@ public:
 		glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
 		shader->Use();
 	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
 };
 class SkyBox
 {
@@ -732,8 +884,10 @@ public:
 		glBindVertexArray(aShader->Vaos->vao);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, aShader->cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		aShader->GLDraw();
 		glDepthFunc(GL_LESS); // set depth function back to default
+
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 };
 
@@ -741,6 +895,13 @@ class ScreenShader : public ObjectShader
 {
 public:
 	FBO* Fbos = nullptr;
+
+	virtual void Use(glm::vec3 viewPos) override
+	{
+		this->shader->Use();
+
+		glBindVertexArray(this->Vaos->vao);
+	}
 
 	virtual void InitShaderAttribute() override
 	{
@@ -771,6 +932,11 @@ public:
 		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 
 	void SetFBO()
@@ -831,10 +997,140 @@ public:
 		this->shader->setInt("u_screenTexture", this->Fbos->textures[0]);
 		glActiveTexture(GL_TEXTURE_2D + this->Fbos->textures[0]);
 		glBindTexture(GL_TEXTURE_2D, this->Fbos->textures[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		glBindVertexArray(0);
+		this->GLDraw();
 		glEnable(GL_DEPTH_TEST);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+};
+
+class BSplineGeometryShader : public ObjectShader
+{
+public:
+	virtual void InitShaderAttribute() override
+	{
+
+	}
+
+	virtual void Use(glm::vec3) override
+	{
+		shader->Use();
+
+		SetModelView7ProjectionMatrix();
+
+		glBindVertexArray(this->Vaos->vao);
+	}
+
+	virtual void SetVAO() override
+	{
+		if (this->Vaos == nullptr)
+			Vaos = new VAO;
+		float vertices[] = {
+			// positions        
+			0, 0, 0
+		};
+
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_POINTS, 0, 1);
+	}
+};
+class BSpline
+{
+public:
+	glm::vec3 Position;
+
+	void Draw(BSplineGeometryShader* aShader)
+	{
+		aShader->GLDraw();
+	}
+};
+
+class RoadShader : public ObjectShader
+{
+public:
+	virtual void InitShaderAttribute() override
+	{
+
+	}
+
+	virtual void SetVAO()
+	{
+		float vertices[] = {
+			// positions          // normals          
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+		};
+
+		glGenVertexArrays(1, &this->Vaos->vao);
+		glGenBuffers(1, this->Vaos->vbo);
+
+		glBindVertexArray(this->Vaos->vao);
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
+	}
+
+	virtual void Use(glm::vec3) override
+	{
+		this->shader->Use();
+
+		this->SetModelView7ProjectionMatrix();
+
+		glBindVertexArray(this->Vaos->vao);
 	}
 };
 
@@ -870,6 +1166,7 @@ class TrainView : public Fl_Gl_Window
 		{
 			heightMapShader.UpdataShader();
 			boxShader.UpdataShader();
+			lineShader.UpdataShader();
 		}
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -877,6 +1174,7 @@ class TrainView : public Fl_Gl_Window
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
+		void GetPos(float const t, Pnt3f& pos, Pnt3f& orient);
 
 		//Shader* shader		= nullptr;
 		//Texture2D* texture	= nullptr;
@@ -911,4 +1209,7 @@ class TrainView : public Fl_Gl_Window
 		Cube cube;
 
 		ScreenShader screenShader;
+
+		BSplineGeometryShader lineShader;
+		BSpline line;
 };

@@ -322,6 +322,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClInclude Include="..\src\GameObject\GameObject.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
+    <None Include="..\src\shaders\BSpline.frag" />
+    <None Include="..\src\shaders\BSpline.geom" />
+    <None Include="..\src\shaders\BSpline.vert" />
     <None Include="..\src\shaders\color.frag" />
     <None Include="..\src\shaders\colors.vert" />
     <None Include="..\src\shaders\HeightWave.frag" />
@@ -330,6 +333,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\HeightWave.vert" />
     <None Include="..\src\shaders\lightCbue.vert" />
     <None Include="..\src\shaders\lightCube.frag" />
+    <None Include="..\src\shaders\Line.frag" />
+    <None Include="..\src\shaders\Line.vert" />
     <None Include="..\src\shaders\model.frag" />
     <None Include="..\src\shaders\model.vert" />
     <None Include="..\src\shaders\RayCast.frag" />

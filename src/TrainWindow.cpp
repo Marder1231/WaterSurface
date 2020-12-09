@@ -392,6 +392,15 @@ advanceTrain(float dir)
 	// TODO: make this work for your train
 	trainView->HeightWave.WaveGoGOo(1);
 
+	trainView->m_pTrack->trainU += 0.01f;
+	while (trainView->m_pTrack->trainU >= 1.0f)
+	{
+		trainView->m_pTrack->TurnCounter++;
+		trainView->m_pTrack->TurnCounter %= trainView->m_pTrack->points.size();
+
+		trainView->m_pTrack->trainU -= 1.0f;
+	}
+
 	//#####################################################################
 #ifdef EXAMPLE_SOLUTION
 	// note - we give a little bit more example code here than normal,

@@ -189,6 +189,7 @@ void TrainView::draw()
 	{
 		//initiailize VAO, VBO, Shader...
 
+#pragma region ShaderInit
 		if (skyBoxShader.shader == nullptr)
 		{
 			skyBoxShader.SetShader("../src/shaders/SkyBox.vert"
@@ -326,6 +327,16 @@ void TrainView::draw()
 			screenShader.SetVAO();
 			screenShader.SetFBO();
 		}
+
+		if (lineShader.shader == nullptr)
+		{
+			lineShader.SetShader("../src/shaders/BSpline.vert",
+				nullptr, nullptr, "../src/shaders/BSpline.geom",
+				"../src/shaders/BSpline.frag");
+			lineShader.SetVAO();
+		}
+#pragma endregion 
+
 	}
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
@@ -359,43 +370,6 @@ void TrainView::draw()
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
-	
-
-	//*********************************************************************
-	//
-	// * set the light parameters
-	//
-	//**********************************************************************
-	GLfloat lightPosition1[]	= {0,1,1,0}; // {50, 200.0, 50, 1.0};
-	GLfloat lightPosition2[]	= {1, 0, 0, 0};
-	GLfloat lightPosition3[]	= {0, -1, 0, 0};
-	GLfloat yellowLight[]		= {0.5f, 0.5f, .1f, 1.0};
-	GLfloat whiteLight[]			= {1.0f, 1.0f, 1.0f, 1.0};
-	GLfloat blueLight[]			= {.1f,.1f,.3f,1.0};
-	GLfloat grayLight[]			= {.3f, .3f, .3f, 1.0};
-
-	//glLightfv(GL_LIGHT0, GL_POSITION, lightPosition1);
-	//glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteLight);
-	//glLightfv(GL_LIGHT0, GL_AMBIENT, grayLight);
-
-	//glLightfv(GL_LIGHT1, GL_POSITION, lightPosition2);
-	//glLightfv(GL_LIGHT1, GL_DIFFUSE, yellowLight);
-
-	//glLightfv(GL_LIGHT2, GL_POSITION, lightPosition3);
-	//glLightfv(GL_LIGHT2, GL_DIFFUSE, blueLight);
-
-	// set linstener position 
-	if(selectedCube >= 0)
-		alListener3f(AL_POSITION, 
-			m_pTrack->points[selectedCube].pos.x,
-			m_pTrack->points[selectedCube].pos.y,
-			m_pTrack->points[selectedCube].pos.z);
-	else
-		alListener3f(AL_POSITION, 
-			this->source_pos.x, 
-			this->source_pos.y,
-			this->source_pos.z);
-
 
 	//*********************************************************************
 	// now draw the ground plane
@@ -404,15 +378,13 @@ void TrainView::draw()
 	glUseProgram(0);
 
 	setupFloor();
-	glDisable(GL_LIGHTING);
-	//drawFloor(200,10);
+
 
 
 	//*********************************************************************
 	// now draw the object and we need to do it twice
 	// once for real, and then once for shadows
 	//*********************************************************************
-	glEnable(GL_LIGHTING);
 	setupObjects();
 	
 	//testShader.Draw(timer);
@@ -431,8 +403,7 @@ void TrainView::draw()
 	skyBoxShader.Use(viewPos);
 	glm::mat4 removeTranslateViewPos = glm::mat4(glm::mat3(cameraView)); // remove translation from the view matrix
 	skyBox.Draw(&skyBoxShader, removeTranslateViewPos);
-
-
+	skyBoxShader.Unuse();
 
 	glStencilMask(0x00);
 
@@ -450,86 +421,88 @@ void TrainView::draw()
 	//cube.Draw(&cubeShader);
 
 	glDisable(GL_CULL_FACE);
-	//$$$不會跑
-	[&]()
-	{
-		//std::cout << "text";
-	}();
-	///*draw light*/ {
-	//	lightCubeShader.Use(viewPos);
-	//	Environment* instance = Environment::GetInstance();
-	//	Lighting::BaseLight* nowChoiceLight = nullptr;
-	//	for (auto& light : instance->lights.Lightings)
-	//	{
-	//		//record now pick light
-	//		if (tw->lightingWidget->nowChooseLightIndex != -1 && light.second->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
-	//		{
-	//			//寫入模板
-	//			glStencilFunc(GL_ALWAYS, 1, 0xff);
-	//			glStencilMask(0xff);
-	//			nowChoiceLight = light.second;
-	//		}
-	//		else
-	//		{
-	//			glStencilMask(0x00);
-	//		}
 
-	//		if (light.second->Type == Lighting::EmLightType::Point)
-	//		{
-	//			Lighting::PointLight* pointLight = static_cast<Lighting::PointLight*>(light.second);
-	//			lightCubeShader.SetColor(glm::vec3(1, 1, 1));
-	//			lightCubeShader.Draw(pointLight->GetPosition());
-	//		}
-	//		else if (light.second->Type == Lighting::EmLightType::Spot)
-	//		{
-	//			Lighting::SpotLight* spotLight = static_cast<Lighting::SpotLight*>(light.second);
-	//			lightCubeShader.SetColor(glm::vec3(1, 1, 1));
-	//			lightCubeShader.Draw(spotLight->GetPosition());
+	/*draw light*/ {
+		//lightCubeShader.Use(viewPos);
+		//Environment* instance = Environment::GetInstance();
+		//Lighting::BaseLight* nowChoiceLight = nullptr;
+		//for (auto& light : instance->lights.Lightings)
+		//{
+		//	//record now pick light
+		//	if (tw->lightingWidget->nowChooseLightIndex != -1 && light.second->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+		//	{
+		//		//寫入模板
+		//		glStencilFunc(GL_ALWAYS, 1, 0xff);
+		//		glStencilMask(0xff);
+		//		nowChoiceLight = light.second;
+		//	}
+		//	else
+		//	{
+		//		glStencilMask(0x00);
+		//	}
 
-	//			glm::vec3 rayDirection = spotLight->GetDirection();
+		//	if (light.second->Type == Lighting::EmLightType::Point)
+		//	{
+		//		Lighting::PointLight* pointLight = static_cast<Lighting::PointLight*>(light.second);
+		//		lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+		//		lightCubeShader.Draw(pointLight->GetPosition());
+		//	}
+		//	else if (light.second->Type == Lighting::EmLightType::Spot)
+		//	{
+		//		Lighting::SpotLight* spotLight = static_cast<Lighting::SpotLight*>(light.second);
+		//		lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+		//		lightCubeShader.Draw(spotLight->GetPosition());
 
-	//			//draw raycast
-	//			glPushMatrix();
-	//			glBegin(GL_LINES);
-	//			if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
-	//				glColor3f(1, 1, 0);
-	//			else
-	//				glColor3f(0, 1, 1);
-	//			glVertex3f(0, 0, 0);
-	//			glVertex3f(6.24 * rayDirection.x, 6.24 * rayDirection.y, 6.24 * rayDirection.z);
-	//			glEnd();
-	//			glPopMatrix();
-	//		}
-	//	}
+		//		glm::vec3 rayDirection = spotLight->GetDirection();
 
-	//	glStencilFunc(GL_NOTEQUAL, 1, 0xff);
-	//	glStencilMask(0x00);
-	//	glDisable(GL_DEPTH_TEST);
+		//		//draw raycast
+		//		glPushMatrix();
+		//		glBegin(GL_LINES);
+		//		if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+		//			glColor3f(1, 1, 0);
+		//		else
+		//			glColor3f(0, 1, 1);
+		//		glVertex3f(0, 0, 0);
+		//		glVertex3f(6.24 * rayDirection.x, 6.24 * rayDirection.y, 6.24 * rayDirection.z);
+		//		glEnd();
+		//		glPopMatrix();
+		//	}
+		//}
 
-	//	lightCubeShader.Use(viewPos);
-	//	glm::vec3 scale = glm::vec3(1.1f, 1.1f, 1.1f);
-	//	lightCubeShader.SetColor(glm::vec3(1, 0, 0));
-	//	if (nowChoiceLight != nullptr)
-	//	{
-	//		if (nowChoiceLight->Type == Lighting::EmLightType::Point)
-	//		{
-	//			Lighting::PointLight* _light = static_cast<Lighting::PointLight*>(nowChoiceLight);
-	//			lightCubeShader.Draw(_light->GetPosition(), scale);
-	//		}
-	//		else if (nowChoiceLight->Type == Lighting::EmLightType::Spot)
-	//		{
-	//			Lighting::SpotLight* _light = static_cast<Lighting::SpotLight*>(nowChoiceLight);
-	//			lightCubeShader.Draw(_light->GetPosition(), scale);
-	//		}
-	//	}
-	//};
+		//glStencilFunc(GL_NOTEQUAL, 1, 0xff);
+		//glStencilMask(0x00);
+		//glDisable(GL_DEPTH_TEST);
 
+		//lightCubeShader.Use(viewPos);
+		//glm::vec3 scale = glm::vec3(1.1f, 1.1f, 1.1f);
+		//lightCubeShader.SetColor(glm::vec3(1, 0, 0));
+		//if (nowChoiceLight != nullptr)
+		//{
+		//	if (nowChoiceLight->Type == Lighting::EmLightType::Point)
+		//	{
+		//		Lighting::PointLight* _light = static_cast<Lighting::PointLight*>(nowChoiceLight);
+		//		lightCubeShader.Draw(_light->GetPosition(), scale);
+		//	}
+		//	else if (nowChoiceLight->Type == Lighting::EmLightType::Spot)
+		//	{
+		//		Lighting::SpotLight* _light = static_cast<Lighting::SpotLight*>(nowChoiceLight);
+		//		lightCubeShader.Draw(_light->GetPosition(), scale);
+		//	}
+		//}
+	};
 
 	screenShader.UnBindFBO();
 	screenShader.Draw(glm::vec3(0));
+	screenShader.Unuse();
 
-	heightMapShader.Use(viewPos);
-	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+	//heightMapShader.Use(viewPos);
+	//HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+	//heightMapShader.Unuse();
+
+	//glClearColor(.1f, .1f, .1f, 1.0f);
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+	drawStuff(false);
 }
 
 //************************************************************************
@@ -548,20 +521,32 @@ void TrainView::drawStuff(bool doingShadows)
 {
 	// Draw the control points
 	// don't draw the control points if you're driving 
-	// (otherwise you get sea-sick as you drive through them)
-	//if (!tw->trainCam->value()) {
-	//	for(size_t i=0; i<m_pTrack->points.size(); ++i) {
-	//		if (!doingShadows) {
-	//			if ( ((int) i) != selectedCube)
-	//				glColor3ub(240, 60, 60);
-	//			else
-	//				glColor3ub(240, 240, 30);
-	//		}
-	//		m_pTrack->points[i].draw();
-	//	}
-	//}
+	//// (otherwise you get sea-sick as you drive through them)
+	for (size_t i = 0; i < m_pTrack->points.size(); ++i) 
+	{
+		if (!doingShadows) {
+			if (((int)i) != selectedCube)
+				glColor3ub(240, 60, 60);
+			else
+				glColor3ub(240, 240, 30);
+		}
+		m_pTrack->points[i].draw();
+	}
 
-	
+	lineShader.Use(glm::vec3());
+	lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());
+	for (int i = 0; i < m_pTrack->points.size(); i++)
+	{
+		lineShader.shader->setVec3("cp[" + std::to_string(i) + "].position" , glm::vec3(m_pTrack->points[i].pos.x, m_pTrack->points[i].pos.y, m_pTrack->points[i].pos.z));
+		lineShader.shader->setVec3("cp[" + std::to_string(i) + "].orient", glm::vec3(m_pTrack->points[i].orient.x, m_pTrack->points[i].orient.y, m_pTrack->points[i].orient.z));
+	}
+
+	for (int i = 0; i < m_pTrack->points.size(); i++)
+	{
+		lineShader.shader->setInt("u_nowControlPointIndex", i);
+		line.Draw(&lineShader);
+	}
+	lineShader.Unuse();
 
 	// draw the track
 	//####################################################################
