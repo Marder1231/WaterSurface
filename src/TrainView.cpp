@@ -512,6 +512,10 @@ void TrainView::draw()
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	drawStuff(false);
+
+	/*
+		gitlab test
+	*/
 }
 
 void TrainView::GetPos(float const t, Pnt3f& pos, Pnt3f& orient)
