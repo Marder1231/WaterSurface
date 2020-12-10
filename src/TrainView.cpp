@@ -335,6 +335,15 @@ void TrainView::draw()
 				"../src/shaders/BSpline.frag");
 			lineShader.SetVAO();
 		}
+
+		if (roadShader.shader == nullptr)
+		{
+			roadShader.SetShader("../src/shaders/Road.vert",
+				nullptr, nullptr, nullptr,
+				"../src/shaders/Road.frag");
+			roadShader.SetVAO();
+			roadShader.AddTexture("../Images/Road.png");
+		}
 #pragma endregion 
 
 	}
@@ -405,22 +414,22 @@ void TrainView::draw()
 	skyBox.Draw(&skyBoxShader, removeTranslateViewPos);
 	skyBoxShader.Unuse();
 
-	glStencilMask(0x00);
+	//glStencilMask(0x00);
 
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glFrontFace(GL_CCW);
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_BACK);
+	//glFrontFace(GL_CCW);
 
 	//std::cout << "view pos x : " << viewPos.x << ", y : " << viewPos.y << ", z : " << viewPos.z << std::endl;
 	//boxShader.Use(viewPos);
 	//testCube.Draw(&boxShader);
-	//
+	
 	modelShader.Draw(viewPos);
 
 	//cubeShader.Use(viewPos);
 	//cube.Draw(&cubeShader);
 
-	glDisable(GL_CULL_FACE);
+	//glDisable(GL_CULL_FACE);
 
 	/*draw light*/ {
 		//lightCubeShader.Use(viewPos);
@@ -491,13 +500,13 @@ void TrainView::draw()
 		//}
 	};
 
+	heightMapShader.Use(viewPos);
+	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+	heightMapShader.Unuse();
+
 	screenShader.UnBindFBO();
 	screenShader.Draw(glm::vec3(0));
 	screenShader.Unuse();
-
-	//heightMapShader.Use(viewPos);
-	//HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
-	//heightMapShader.Unuse();
 
 	//glClearColor(.1f, .1f, .1f, 1.0f);
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -505,6 +514,49 @@ void TrainView::draw()
 	drawStuff(false);
 }
 
+void TrainView::GetPos(float const t, Pnt3f& pos, Pnt3f& orient)
+{
+	// pos
+	ControlPoint cp1 = m_pTrack->points[int(t) % m_pTrack->points.size()];
+	ControlPoint cp2 = m_pTrack->points[(int(t) + 1) % m_pTrack->points.size()];
+	ControlPoint cp3 = m_pTrack->points[(int(t) + 2) % m_pTrack->points.size()];
+	ControlPoint cp4 = m_pTrack->points[(int(t) + 3) % m_pTrack->points.size()];
+
+	float interval = t - int(t);
+
+	glm::mat4x3 matG =
+	{
+		cp1.pos.x, cp1.pos.y, cp1.pos.z,
+		cp2.pos.x, cp2.pos.y, cp2.pos.z,
+		cp3.pos.x, cp3.pos.y, cp3.pos.z,
+		cp4.pos.x, cp4.pos.y, cp4.pos.z,
+	};
+	glm::mat4x3 matO =
+	{
+		cp1.orient.x, cp1.orient.y, cp1.orient.z,
+		cp2.orient.x, cp2.orient.y, cp2.orient.z,
+		cp3.orient.x, cp3.orient.y, cp3.orient.z,
+		cp4.orient.x, cp4.orient.y, cp4.orient.z,
+	};
+	glm::mat4x4 matM =
+	{
+		-1 / 6.0f, 3 / 6.0f, -3 / 6.0f, 1 / 6.0f,
+		3 / 6.0f, -6 / 6.0f, 3 / 6.0f, 0,
+		-3 / 6.0f, 0, 3 / 6.0f, 0,
+		1 / 6.0f, 4 / 6.0f, 1 / 6.0f, 0
+	};
+	glm::fvec4 vecT = { interval * interval * interval, interval * interval, interval, 1 };
+
+	glm::fvec3 qt = matG * matM * vecT;
+	glm::fvec3 ot = matO * matM * vecT;
+
+	pos.x = qt.x;
+	pos.y = qt.y;
+	pos.z = qt.z;
+	orient.x = ot.x;
+	orient.y = ot.y;
+	orient.z = ot.z;
+}
 //************************************************************************
 //
 // * this draws all of the stuff in the world
@@ -533,20 +585,116 @@ void TrainView::drawStuff(bool doingShadows)
 		m_pTrack->points[i].draw();
 	}
 
-	lineShader.Use(glm::vec3());
-	lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());
-	for (int i = 0; i < m_pTrack->points.size(); i++)
-	{
-		lineShader.shader->setVec3("cp[" + std::to_string(i) + "].position" , glm::vec3(m_pTrack->points[i].pos.x, m_pTrack->points[i].pos.y, m_pTrack->points[i].pos.z));
-		lineShader.shader->setVec3("cp[" + std::to_string(i) + "].orient", glm::vec3(m_pTrack->points[i].orient.x, m_pTrack->points[i].orient.y, m_pTrack->points[i].orient.z));
-	}
+	//lineShader.Use(glm::vec3());
+	//lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());
+	//for (int i = 0; i < m_pTrack->points.size(); i++)
+	//{
+	//	lineShader.shader->setVec3("cp[" + std::to_string(i) + "].position" , glm::vec3(m_pTrack->points[i].pos.x, m_pTrack->points[i].pos.y, m_pTrack->points[i].pos.z));
+	//	lineShader.shader->setVec3("cp[" + std::to_string(i) + "].orient", glm::vec3(m_pTrack->points[i].orient.x, m_pTrack->points[i].orient.y, m_pTrack->points[i].orient.z));
+	//}
 
+	//for (int i = 0; i < m_pTrack->points.size(); i++)
+	//{
+	//	lineShader.shader->setInt("u_nowControlPointIndex", i);
+	//	line.Draw(&lineShader);
+	//}
+	//lineShader.Unuse();
+
+	//¹ê¨Ò¤Æ 
+	roadShader.Use(glm::vec3());
 	for (int i = 0; i < m_pTrack->points.size(); i++)
 	{
-		lineShader.shader->setInt("u_nowControlPointIndex", i);
-		line.Draw(&lineShader);
+		for (int bFour = 0; bFour < 4; bFour++)
+		{
+			lineShader.shader->setVec3("cp[" + std::to_string(bFour) + "].position",
+				glm::vec3(
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].pos.x,
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].pos.y,
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].pos.z)
+			);
+
+			lineShader.shader->setVec3("cp[" + std::to_string(bFour) + "].orient",
+				glm::vec3(
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].orient.x,
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].orient.y,
+					m_pTrack->points[(i + bFour) % m_pTrack->points.size()].orient.z)
+			);
+		}
+
+		float t = i;
+		float percent = 1.0f / roadShader.clipSize;
+		for (int clip = 0; clip < roadShader.clipSize; clip++)
+		{
+			roadShader.shader->setFloat("u_time", t);
+			road.Draw(&roadShader);
+			t += percent;
+		}
 	}
-	lineShader.Unuse();
+	roadShader.Unuse();
+
+	//Pnt3f cpS;
+	//Pnt3f cpSo;
+
+	//GetPos(0, cpS, cpSo);
+
+
+	//for (int i = 0; i < m_pTrack->points.size(); i++)
+	//{
+	//	float dividLine = 10;
+	//	float t = i;
+	//	float percent = 1.0f / dividLine;
+
+	//	for (int j = 0; j < dividLine; j++)
+	//	{
+	//		t += percent;
+	//		float interval = t - int(t);
+
+	//		Pnt3f cpN;
+	//		Pnt3f cpNo;
+	//		GetPos(t, cpN, cpNo);
+
+	//		Pnt3f cross = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z) * cpNo;
+	//		cross.normalize();
+	//		cross = cross * 2.5f;
+
+	//		Pnt3f u = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z); u.normalize();
+	//		Pnt3f w = u * cpNo; w.normalize();
+	//		Pnt3f v = w * u; v.normalize();
+
+
+	//		float barWidth = 2;
+	//		float barHeight = 0.5f;
+	//		float barLength = 6;
+
+	//		float rotation[16] =
+	//		{
+	//			u.x, u.y, u.z, 0.0f,
+	//			v.x, v.y, v.z, 0.0f,
+	//			w.x, w.y, w.z, 0.0f,
+	//			0.0f, 0.0f, 0.0f, 1.0f,
+	//		};
+
+	//		glPushMatrix();
+	//		glTranslatef(cpN.x, cpN.y, cpN.z);
+	//		glMultMatrixf(rotation);
+	//		glRotated(90, 0, 1, 0);
+	//		glScaled(4, 1, 4);
+
+	//		glBegin(GL_QUADS);
+
+	//		glColor3ub(255, 0, 0);
+	//		glNormal3f(0, 1, 0);
+	//		glVertex3f(-barLength / 2, 0, -barWidth / 2);
+	//		glVertex3f(-barLength / 2, 0, barWidth / 2);
+	//		glVertex3f(barLength / 2, 0, barWidth / 2);
+	//		glVertex3f(barLength / 2, 0, -barWidth / 2);
+
+	//		glEnd();
+	//		glPopMatrix();
+
+	//		cpS = cpN;
+	//	}
+	//}
 
 	// draw the track
 	//####################################################################

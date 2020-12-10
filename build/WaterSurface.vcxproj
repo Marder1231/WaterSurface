@@ -339,6 +339,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\model.vert" />
     <None Include="..\src\shaders\RayCast.frag" />
     <None Include="..\src\shaders\RayCast.vert" />
+    <None Include="..\src\shaders\Road.frag" />
+    <None Include="..\src\shaders\Road.vert" />
     <None Include="..\src\shaders\ScreenShader.frag" />
     <None Include="..\src\shaders\ScreenShader.vert" />
     <None Include="..\src\shaders\SkyBox.frag" />

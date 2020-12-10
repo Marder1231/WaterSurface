@@ -12,7 +12,7 @@ struct ControlPointAttribute
 uniform int u_ControlPointAmount;
 uniform ControlPointAttribute cp[MAX_CONTROL_POINT];
 uniform int u_nowControlPointIndex;
-uniform float u_clipSize = float(10);
+uniform float u_clipSize = float(24);
 
 uniform mat4 u_view;
 uniform mat4 u_projection;
@@ -86,6 +86,8 @@ void main()
 			cp[int(t + 2) % u_ControlPointAmount].orient,
 			cp[int(t + 3) % u_ControlPointAmount].orient
 		);
+
+
 
 		gl_Position = u_projection * u_view * vec4(cpN, 1);
 		EmitVertex();

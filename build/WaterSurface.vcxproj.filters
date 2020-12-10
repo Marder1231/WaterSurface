@@ -158,6 +158,12 @@
     <None Include="..\src\shaders\BSpline.geom">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\Road.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\Road.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

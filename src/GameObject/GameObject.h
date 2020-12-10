@@ -606,15 +606,19 @@ public:
 		}
 	}
 
-
-	virtual void Unuse()
+	virtual void UnBindTexture()
 	{
-		glBindVertexArray(0);
-
 		for (int i = 0; i < textures.size(); i++)
 		{
 			Texture2D::unbind(i);
 		}
+	}
+
+	void Unuse()
+	{
+		glBindVertexArray(0);
+
+		UnBindTexture();
 
 		shader->Unuse();
 	}

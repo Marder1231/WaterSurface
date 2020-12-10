@@ -42,7 +42,7 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 }
 void main(void)
 {
-	float amplitude = 2.46f;
+	float amplitude = 24.60f;
 	float speed = 2;
 	float waveLength = 10;
 
@@ -50,8 +50,8 @@ void main(void)
 	f_textCoords = interpolate2D(e_textCoords[0],e_textCoords[1], e_textCoords[2]);
 
 	vec3 p = f_position;
-	float height = vec3(texture(u_heightMap, f_textCoords)).r;
-    //float height = sin(f_textCoords.x*2*2*3.1415926);
+	float height = vec3(texture(u_heightMap, f_textCoords)).x;
+//    float height = sin(f_textCoords.x*2*2*3.1415926);
 	height = (height - 0.5f) * amplitude;
 
 	p.y -=  height + Ripple(length(RippleCenter - f_position), amplitude, 1, u_time);

@@ -461,6 +461,12 @@ public:
 	{
 		glDrawElements(GL_PATCHES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
 	}
+
+	virtual void UnBindTexture() override
+	{
+		Texture2D::unbind(0);
+		Texture2D::unbind(1);
+	}
 };
 class HeightMapWave
 {
@@ -483,7 +489,7 @@ public:
 
 		glBindVertexArray(aShader->Vaos->vao);
 
-		glActiveTexture(GL_TEXTURE0 + reflectSkyTextureID);
+		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
 
 		aShader->shader->setFloat("u_time", timer%10);
@@ -496,8 +502,6 @@ public:
 
 		glPatchParameteri(GL_PATCH_VERTICES, 3);
 		aShader->GLDraw();
-
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
 	void WaveGoGOo(int _speed)
@@ -868,6 +872,11 @@ public:
 	{
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
+
+	virtual void UnBindTexture() override
+	{
+		Texture2D::unbind(0);
+	}
 };
 class SkyBox
 {
@@ -882,12 +891,10 @@ public:
 
 		// skybox cube
 		glBindVertexArray(aShader->Vaos->vao);
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, aShader->cubemapTexture);
 		aShader->GLDraw();
 		glDepthFunc(GL_LESS); // set depth function back to default
-
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 };
 
@@ -995,11 +1002,12 @@ public:
 		glBindVertexArray(this->Vaos->vao);
 
 		this->shader->setInt("u_screenTexture", this->Fbos->textures[0]);
-		glActiveTexture(GL_TEXTURE_2D + this->Fbos->textures[0]);
+		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_2D, this->Fbos->textures[0]);
 		this->GLDraw();
 		glEnable(GL_DEPTH_TEST);
-		glBindTexture(GL_TEXTURE_2D, 0);
+
+		Texture2D::unbind(0);
 	}
 };
 
@@ -1059,6 +1067,7 @@ public:
 class RoadShader : public ObjectShader
 {
 public:
+	const int clipSize = 246;
 	virtual void InitShaderAttribute() override
 	{
 
@@ -1066,49 +1075,17 @@ public:
 
 	virtual void SetVAO()
 	{
+		if (this->Vaos == nullptr)
+			this->Vaos = new VAO;
+
 		float vertices[] = {
-			// positions          // normals          
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-			-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-			-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+			// positions         
+			-0.5f,  0, -0.5f,  0.0f,  1.0f,
+			 0.5f,  0, -0.5f,  1.0f,  1.0f,
+			 0.5f,  0,  0.5f,  1.0f,  0.0f,
+			 0.5f,  0,  0.5f,  1.0f,  0.0f,
+			-0.5f,  0,  0.5f,  0.0f,  0.0f,
+			-0.5f,  0, -0.5f,  0.0f,  1.0f
 		};
 
 		glGenVertexArrays(1, &this->Vaos->vao);
@@ -1118,9 +1095,10 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
 	}
 
@@ -1131,8 +1109,28 @@ public:
 		this->SetModelView7ProjectionMatrix();
 
 		glBindVertexArray(this->Vaos->vao);
+
+		this->BindTextures();
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 };
+class Road
+{
+public:
+	void Draw(RoadShader* aShader)
+	{
+		glm::mat4 model = glm::mat4(1);
+		model = glm::translate(model, glm::vec3(0, 0, 0));
+		aShader->shader->setMat4("u_model", model);
+
+		aShader->GLDraw();
+	}
+};
+
 
 class TrainView : public Fl_Gl_Window
 {
@@ -1167,6 +1165,7 @@ class TrainView : public Fl_Gl_Window
 			heightMapShader.UpdataShader();
 			boxShader.UpdataShader();
 			lineShader.UpdataShader();
+			roadShader.UpdataShader();
 		}
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
@@ -1174,6 +1173,7 @@ class TrainView : public Fl_Gl_Window
 
 		TrainWindow*	tw;				// The parent of this display window
 		CTrack*			m_pTrack;		// The track of the entire scene
+		
 		void GetPos(float const t, Pnt3f& pos, Pnt3f& orient);
 
 		//Shader* shader		= nullptr;
@@ -1212,4 +1212,7 @@ class TrainView : public Fl_Gl_Window
 
 		BSplineGeometryShader lineShader;
 		BSpline line;
+
+		RoadShader roadShader;
+		Road road;
 };
