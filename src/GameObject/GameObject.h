@@ -613,7 +613,6 @@ public:
 			Texture2D::unbind(i);
 		}
 	}
-
 	void Unuse()
 	{
 		glBindVertexArray(0);

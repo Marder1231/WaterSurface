@@ -335,6 +335,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\lightCube.frag" />
     <None Include="..\src\shaders\Line.frag" />
     <None Include="..\src\shaders\Line.vert" />
+    <None Include="..\src\shaders\MapRoad.frag" />
+    <None Include="..\src\shaders\MapRoad.vert" />
     <None Include="..\src\shaders\model.frag" />
     <None Include="..\src\shaders\model.vert" />
     <None Include="..\src\shaders\RayCast.frag" />

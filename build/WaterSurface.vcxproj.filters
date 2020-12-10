@@ -164,6 +164,12 @@
     <None Include="..\src\shaders\Road.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\MapRoad.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\MapRoad.vert">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

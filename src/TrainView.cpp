@@ -344,6 +344,14 @@ void TrainView::draw()
 			roadShader.SetVAO();
 			roadShader.AddTexture("../Images/Road.png");
 		}
+
+		if (mapRoadShader.shader == nullptr)
+		{
+			mapRoadShader.SetShader("../src/shaders/MapRoad.vert",
+				nullptr, nullptr, nullptr,
+				"../src/shaders/MapRoad.frag");
+			ComputeDistance();
+		}
 #pragma endregion 
 
 	}
@@ -587,6 +595,10 @@ void TrainView::drawStuff(bool doingShadows)
 		m_pTrack->points[i].draw();
 	}
 
+	mapRoadShader.Use(glm::vec3());
+	mapRoad.Draw(&mapRoadShader);
+	mapRoadShader.Unuse();
+
 	//lineShader.Use(glm::vec3());
 	//lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());
 	//for (int i = 0; i < m_pTrack->points.size(); i++)
@@ -602,68 +614,85 @@ void TrainView::drawStuff(bool doingShadows)
 	//}
 	//lineShader.Unuse();
 
-	Pnt3f cpS;
-	Pnt3f cpSo;
+	//Pnt3f cpS;
+	//Pnt3f cpSo;
 
-	GetPos(0, cpS, cpSo);
+	//GetPos(0, cpS, cpSo);
 
-	for (int i = 0; i < m_pTrack->points.size(); i++)
-	{
-		float dividLine = m_pTrack->PointDistances[i] / 2;
-		float t = i;
-		float percent = 1.0f / dividLine;
+	//for (int i = 0; i < m_pTrack->points.size(); i++)
+	//{
+	//	float dividLine = m_pTrack->PointDistances[i] / 2;
+	//	float t = i;
+	//	float percent = 1.0f / dividLine;
 
-		for (int j = 0; j < dividLine; j++)
-		{
-			t += percent;
-			float interval = t - int(t);
+	//	for (int j = 0; j < dividLine; j++)
+	//	{
+	//		t += percent;
+	//		float interval = t - int(t);
 
-			Pnt3f cpN;
-			Pnt3f cpNo;
-			GetPos(t, cpN, cpNo);
+	//		Pnt3f cpN;
+	//		Pnt3f cpNo;
+	//		GetPos(t, cpN, cpNo);
 
-			Pnt3f cross = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z) * cpNo;
-			cross.normalize();
-			cross = cross * 2.5f;
+	//		Pnt3f cross = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z) * cpNo;
+	//		cross.normalize();
+	//		cross = cross * 2.5f;
 
-			Pnt3f u = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z); u.normalize();
-			Pnt3f w = u * cpNo; w.normalize();
-			Pnt3f v = w * u; v.normalize();
+	//		Pnt3f u = Pnt3f(cpN.x - cpS.x, cpN.y - cpS.y, cpN.z - cpS.z); u.normalize();
+	//		Pnt3f w = u * cpNo; w.normalize();
+	//		Pnt3f v = w * u; v.normalize();
+
+	//		float newVertices[] = {
+	//			cpS.x + cross.x, cpS.y + cross.y, cpS.z + cross.z,
+	//			cpN.x + cross.x, cpN.y + cross.y, cpN.z + cross.z,
+	//			cpS.x - cross.x, cpS.y - cross.y, cpS.z - cross.z,
+	//			cpN.x - cross.x, cpN.y - cross.y, cpN.z - cross.z
+	//		};
+	//		float sourceElement[] = {
+	//			0, 1, 2,
+	//			1, 2, 3
+	//		};
 
 
-			float barWidth = 2;
-			float barHeight = 0.5f;
-			float barLength = 6;
 
-			float rotation[16] =
-			{
-				u.x, u.y, u.z, 0.0f,
-				v.x, v.y, v.z, 0.0f,
-				w.x, w.y, w.z, 0.0f,
-				0.0f, 0.0f, 0.0f, 1.0f,
-			};
+	//		//float barWidth = 2;
+	//		//float barHeight = 0.5f;
+	//		//float barLength = 6;
 
-			glPushMatrix();
-			glTranslatef(cpN.x, cpN.y, cpN.z);
-			glMultMatrixf(rotation);
-			glRotated(90, 0, 1, 0);
-			glScaled(2.4f, 1, 2.4f);
+	//		//float rotation[16] =
+	//		//{
+	//		//	u.x, u.y, u.z, 0.0f,
+	//		//	v.x, v.y, v.z, 0.0f,
+	//		//	w.x, w.y, w.z, 0.0f,
+	//		//	0.0f, 0.0f, 0.0f, 1.0f,
+	//		//};
 
-			glBegin(GL_QUADS);
+	//		//glm::mat4 model = glm::mat4(1.0f);
+	//		//model = glm::translate(model, glm::vec3(cpN.x, cpN.y, cpN.z));
+	//		//glm::mat4 rotate = glm::make_mat4(rotation);
+	//		//model = rotate * model;
 
-			glColor3ub(0, 0, 0);
-			glNormal3f(0, 1, 0);
-			glVertex3f(-barLength / 2, 0, -barWidth / 2);
-			glVertex3f(-barLength / 2, 0, barWidth / 2);
-			glVertex3f(barLength / 2, 0, barWidth / 2);
-			glVertex3f(barLength / 2, 0, -barWidth / 2);
+	//		//glPushMatrix();
+	//		//glTranslatef(cpN.x, cpN.y, cpN.z);
+	//		//glMultMatrixf(rotation);
+	//		//glRotated(90, 0, 1, 0);
+	//		//glScaled(2.4f, 1, 2.4f);
 
-			glEnd();
-			glPopMatrix();
+	//		//glBegin(GL_QUADS);
 
-			cpS = cpN;
-		}
-	}
+	//		//glColor3ub(0, 0, 0);
+	//		//glNormal3f(0, 1, 0);
+	//		//glVertex3f(-barLength / 2, 0, -barWidth / 2);
+	//		//glVertex3f(-barLength / 2, 0, barWidth / 2);
+	//		//glVertex3f(barLength / 2, 0, barWidth / 2);
+	//		//glVertex3f(barLength / 2, 0, -barWidth / 2);
+
+	//		//glEnd();
+	//		//glPopMatrix();
+
+	//		cpS = cpN;
+	//	}
+	//}
 
 	////$$$¹ê¨Ò¤Æ 
 	//roadShader.Use(glm::vec3());
@@ -852,13 +881,21 @@ float TrainView::T2Distance(int& _turnCounter, float& _trianU)
 
 void TrainView::ComputeDistance()
 {
-	const int clipcounter = 10;
+	const int clipcounter = 24;
 	TotalDistance = 0;
 	m_pTrack->PointDistances.clear();
 	//compute distance
 	Pnt3f cps;
 	Pnt3f cpso;
 	GetPos(0, cps, cpso);
+
+	float sourceElement[] = {
+	0, 1, 2,
+	1, 2, 3
+	};
+	std::vector<float> vertices;
+	std::vector<int> elements;
+
 	for (int i = 0; i < m_pTrack->points.size(); i++)
 	{
 		float t = i;
@@ -880,9 +917,48 @@ void TrainView::ComputeDistance()
 			distance = sqrt(distance);
 			distancetotal += distance;
 			TotalDistance += distance;
+
+			Pnt3f cross = diff * cpno;
+			cross.normalize();
+			cross = cross * 12.26f;
+
+			Pnt3f u = Pnt3f(cpn.x - cps.x, cpn.y - cps.y, cpn.z - cps.z); u.normalize();
+			Pnt3f w = u * cpno; w.normalize();
+			Pnt3f v = w * u; v.normalize();
+
+			float newVertices[] = {
+				cps.x + cross.x, cps.y + cross.y, cps.z + cross.z,
+				cps.x - cross.x, cps.y - cross.y, cps.z - cross.z,
+				cpn.x + cross.x, cpn.y + cross.y, cpn.z + cross.z,
+				cpn.x - cross.x, cpn.y - cross.y, cpn.z - cross.z
+			};
+			int mult = vertices.size() / 3;
+			if (sourceElement[0] + mult - 2 > 0)
+			{
+				elements.push_back(sourceElement[0] + mult);	elements.push_back(sourceElement[1] + mult - 2);	elements.push_back(sourceElement[0] + mult - 2);
+				elements.push_back(sourceElement[0] + mult);	elements.push_back(sourceElement[1] + mult);	elements.push_back(sourceElement[1] + mult - 2);
+			}
+
+			elements.push_back(sourceElement[0] + mult);	elements.push_back(sourceElement[1] + mult);	elements.push_back(sourceElement[2] + mult);
+			elements.push_back(sourceElement[3] + mult);	elements.push_back(sourceElement[4] + mult);	elements.push_back(sourceElement[5] + mult);
+
+			vertices.push_back(newVertices[0]);  vertices.push_back(newVertices[1]);  vertices.push_back(newVertices[2]);
+			vertices.push_back(newVertices[3]);  vertices.push_back(newVertices[4]);  vertices.push_back(newVertices[5]);
+			vertices.push_back(newVertices[6]);  vertices.push_back(newVertices[7]);  vertices.push_back(newVertices[8]);
+			vertices.push_back(newVertices[9]);  vertices.push_back(newVertices[10]);  vertices.push_back(newVertices[11]);
+
 			cps = cpn;
 		}
 		m_pTrack->PointDistances.push_back(distancetotal);
+	}
+
+	int mult = vertices.size() / 3 - 4;
+	elements.push_back(sourceElement[5] + mult);	elements.push_back(sourceElement[0]);	elements.push_back(sourceElement[1]);
+	elements.push_back(sourceElement[4] + mult);	elements.push_back(sourceElement[5] + mult);	elements.push_back(sourceElement[0]);
+
+	if (mapRoadShader.shader != nullptr)
+	{
+		mapRoadShader.SetVAO(vertices, elements);
 	}
 }
 

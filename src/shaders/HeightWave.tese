@@ -16,6 +16,7 @@ uniform sampler2D u_heightMap;
 uniform vec3 RippleCenter;
 uniform float u_time;
 
+//reference : http://www.zwqxin.com/archives/opengl/water-simulation-3.html
 float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 {
 	float attenuate = (1 + 0.07f * time * time + 10.0f * dist_to_waveCenter * dist_to_waveCenter);
@@ -35,8 +36,8 @@ float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 
 float CircleWave(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 {
-	float attenuate = time * dist_to_waveCenter - 12 * dist_to_waveCenter + 60;
-	return (24 / attenuate * sin(dist_to_waveCenter -  time) )
+	float attenuate = dist_to_waveCenter * dist_to_waveCenter - 12 * dist_to_waveCenter + 60;
+	return 24 / attenuate * sin(dist_to_waveCenter) 
 			- 5 * Ripple(dist_to_waveCenter, waveCenterAmplitude, int(time));
 }
 

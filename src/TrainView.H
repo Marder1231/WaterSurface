@@ -1139,6 +1139,75 @@ public:
 	}
 };
 
+class MapRoadShader : public ObjectShader
+{
+public:
+	virtual void InitShaderAttribute() override
+	{
+
+	}
+
+	virtual void SetVAO() override
+	{
+		throw new std::exception("Unuse");
+	}
+
+	void UpdateVAO(std::vector<float>& vertices, std::vector<int>& elements)
+	{
+		this->Vaos->element_amount = elements.size();
+		glBindVertexArray(this->Vaos->vao);
+
+		// Position attribute
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+		//Element attribute
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_DYNAMIC_DRAW);
+	}
+	void SetVAO(std::vector<float>& vertices, std::vector<int>& elements)
+	{
+		if (this->Vaos == nullptr)
+		{
+			this->Vaos = new VAO;
+
+			this->Vaos->element_amount = elements.size();
+			glGenVertexArrays(1, &this->Vaos->vao);
+			glGenBuffers(1, this->Vaos->vbo);
+			glGenBuffers(1, &this->Vaos->ebo);
+		}
+		else
+		{
+			UpdateVAO(vertices, elements);
+		}
+	}
+
+	virtual void Use(glm::vec3 _) override
+	{
+		this->shader->Use();
+
+		this->SetModelView7ProjectionMatrix();
+
+		glBindVertexArray(this->Vaos->vao);
+	}
+
+	virtual void GLDraw() override
+	{
+		glDrawElements(GL_TRIANGLES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
+	}
+};
+class MapRoad
+{
+public:
+	void Draw(MapRoadShader* aShader)
+	{
+
+
+		aShader->GLDraw();
+	}
+};
 
 class TrainView : public Fl_Gl_Window
 {
@@ -1233,4 +1302,7 @@ class TrainView : public Fl_Gl_Window
 
 		RoadShader roadShader;
 		Road road;
+
+		MapRoadShader mapRoadShader;
+		MapRoad mapRoad;
 };
