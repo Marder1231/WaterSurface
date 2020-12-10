@@ -15,9 +15,10 @@ uniform sampler2D u_heightMap;
 
 uniform vec3 RippleCenter;
 uniform float u_time;
-float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float velocity, float time)
+
+float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 {
-	float attenuate = 1 + 0.07f * time * time + 10.0f * dist_to_waveCenter * dist_to_waveCenter;
+	float attenuate = (1 + 0.07f * time * time + 10.0f * dist_to_waveCenter * dist_to_waveCenter);
 
 	float factor = waveCenterAmplitude / attenuate;
 
@@ -25,12 +26,19 @@ float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float velocity
 
 	float freq = origninFreq / (1.0f + 0.07f * time);
 
-	float deltaT = dist_to_waveCenter / velocity;
+	float deltaT = dist_to_waveCenter / freq;
 
-	float DestVertexHeight = factor * cos(freq * (time + deltaT) + 3.1415926);
+	float DestVertexHeight = factor * cos( (time) + 3.1415926);
 
 	return DestVertexHeight * 0.1f;
 }	
+
+float CircleWave(float dist_to_waveCenter, float waveCenterAmplitude, float time)
+{
+	float attenuate = time * dist_to_waveCenter - 12 * dist_to_waveCenter + 60;
+	return (24 / attenuate * sin(dist_to_waveCenter -  time) )
+			- 5 * Ripple(dist_to_waveCenter, waveCenterAmplitude, int(time));
+}
 
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
 {
@@ -42,7 +50,7 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 }
 void main(void)
 {
-	float amplitude = 24.60f;
+	float amplitude = 2.460f;
 	float speed = 2;
 	float waveLength = 10;
 
@@ -54,7 +62,7 @@ void main(void)
 //    float height = sin(f_textCoords.x*2*2*3.1415926);
 	height = (height - 0.5f) * amplitude;
 
-	p.y -=  height + Ripple(length(RippleCenter - f_position), amplitude, 1, u_time);
+	p.y -=  height + CircleWave(length(RippleCenter - f_position), amplitude, u_time);
 	f_position = p;
 
 	gl_Position = u_projection * u_view * vec4(f_position, 1);

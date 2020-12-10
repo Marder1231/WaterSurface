@@ -473,6 +473,8 @@ class HeightMapWave
 	int timer = 0;
 
 	const int WavePictureAmount= 200;
+
+	int animateTimer = 0;
 public:
 	glm::vec3 Position = glm::vec3(0, 0, 0);
 
@@ -492,7 +494,7 @@ public:
 		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
 
-		aShader->shader->setFloat("u_time", timer%10);
+		aShader->shader->setFloat("u_time", animateTimer);
 
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -507,9 +509,15 @@ public:
 	void WaveGoGOo(int _speed)
 	{
 		timer += _speed;
+		animateTimer += _speed;
 
 		if (timer >= WavePictureAmount)
 			timer -= WavePictureAmount;
+	}
+
+	void ResetAnimate()
+	{
+		animateTimer = 0;
 	}
 };
 
@@ -1163,10 +1171,20 @@ class TrainView : public Fl_Gl_Window
 		void UpdataAllShader()
 		{
 			heightMapShader.UpdataShader();
+			HeightWave.ResetAnimate();
+
 			boxShader.UpdataShader();
 			lineShader.UpdataShader();
 			roadShader.UpdataShader();
 		}
+
+		void Distance2T(float& _distance, int& _turnCounter, float& _trainU);
+		void Distance2Pos(float _distance, Pnt3f& _pos, Pnt3f& _orient);
+		float T2Distance(int& _turnCounter, float& _trianU);
+		void ComputeDistance();
+		void ARCGoGo(float);
+		float TotalDistance = 0;
+
 	public:
 		ArcBallCam		arcball;			// keep an ArcBall for the UI
 		int				selectedCube;  // simple - just remember which cube is selected

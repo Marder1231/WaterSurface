@@ -53,6 +53,7 @@ class CTrack {
 		// objects that we know that all implementations are going to need and that
 		// we're going to have to handle specially
 		vector<ControlPoint> points;
+		vector<float> PointDistances;
 
 		//###################################################################
 		// TODO: you might want to do this differently
