@@ -36,9 +36,9 @@ float Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 
 float CircleWave(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 {
-	float attenuate = 24.6f / (time + 1);
-	return  attenuate * sin(dist_to_waveCenter - time) / pow(2, abs(dist_to_waveCenter - time))
-			- 10 * Ripple(dist_to_waveCenter, waveCenterAmplitude, int(time));
+	float attenuate = dist_to_waveCenter * dist_to_waveCenter - 12 * dist_to_waveCenter + 60;
+	return 24 / attenuate * sin(dist_to_waveCenter) 
+			- 5 * Ripple(dist_to_waveCenter, waveCenterAmplitude, int(time));
 }
 
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
@@ -63,7 +63,7 @@ void main(void)
 //    float height = sin(f_textCoords.x*2*2*3.1415926);
 	height = (height - 0.5f) * amplitude;
 
-	p.y +=  height + CircleWave(length(RippleCenter - f_position), amplitude, u_time);
+	p.y -=  height + CircleWave(length(RippleCenter - f_position), amplitude, u_time);
 	f_position = p;
 
 	gl_Position = u_projection * u_view * vec4(f_position, 1);
