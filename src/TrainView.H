@@ -1161,7 +1161,8 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-		glEnableVertexAttribArray(0);
+		glEnableVertexAttribArray(0); 
+		glVertexAttribDivisor(2, 1);
 
 		//Element attribute
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
@@ -1195,7 +1196,7 @@ public:
 
 	virtual void GLDraw() override
 	{
-		glDrawElements(GL_TRIANGLES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0);
+		glDrawElementsInstanced(GL_TRIANGLES, this->Vaos->element_amount, GL_UNSIGNED_INT, 0, 1);
 	}
 };
 class MapRoad
