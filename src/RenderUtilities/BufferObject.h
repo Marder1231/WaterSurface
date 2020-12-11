@@ -1,7 +1,7 @@
 #pragma once
 #include <glad\glad.h>
 
-#define MAX_FBO_TEXTURE_AMOUNT 4
+#define MAX_FBO_TEXTURE_AMOUNT 6
 #define MAX_VAO_VBO_AMOUNT 4
 
 struct VAO

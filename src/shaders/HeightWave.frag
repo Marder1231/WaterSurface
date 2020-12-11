@@ -104,7 +104,7 @@ void main()
     float glass = 1.52f;
     float diamond = 2.42f;
     //          from / into;
-    float ratio = air / water;
+    float ratio = air / air;
 
     vec3 result = vec3(0);
     vec3 R;

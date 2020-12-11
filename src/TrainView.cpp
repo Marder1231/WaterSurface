@@ -199,15 +199,6 @@ void TrainView::draw()
 			skyBoxShader.LoadCubemap();
 		}
 
-		if (boxShader.shader == nullptr)
-		{
-			boxShader.skyboxID = skyBoxShader.cubemapTexture;
-			boxShader.SetShader("../src/shaders/colors.vert"
-				, nullptr, nullptr, nullptr
-				, "../src/shaders/color.frag");
-			boxShader.SetVAO();
-		}
-
 		if (heightMapShader.shader == nullptr)
 		{
 			glEnable(GL_DEPTH_TEST);
@@ -295,6 +286,8 @@ void TrainView::draw()
 				std::string png = ".png";
 				heightMapShader.AddTexture((path + pickPicture + png).c_str());
 			}
+
+			heightMapShader.SetFBO();
 		}
 
 		if (lightCubeShader.shader == nullptr)
@@ -317,32 +310,6 @@ void TrainView::draw()
 			cubeShader.SetVAO();
 			cubeShader.AddTexture("../Images/container2.png");
 			cubeShader.AddTexture("../Images/specular.png");
-		}
-
-		if (screenShader.shader == nullptr)
-		{
-			screenShader.SetShader("../src/shaders/ScreenShader.vert", 
-				nullptr, nullptr, nullptr, 
-				"../src/shaders/ScreenShader.frag");
-			screenShader.SetVAO();
-			screenShader.SetFBO();
-		}
-
-		if (lineShader.shader == nullptr)
-		{
-			lineShader.SetShader("../src/shaders/BSpline.vert",
-				nullptr, nullptr, "../src/shaders/BSpline.geom",
-				"../src/shaders/BSpline.frag");
-			lineShader.SetVAO();
-		}
-
-		if (roadShader.shader == nullptr)
-		{
-			roadShader.SetShader("../src/shaders/Road.vert",
-				nullptr, nullptr, nullptr,
-				"../src/shaders/Road.frag");
-			roadShader.SetVAO();
-			roadShader.AddTexture("../Images/Road.png");
 		}
 
 		if (mapRoadShader.shader == nullptr)
@@ -412,15 +379,70 @@ void TrainView::draw()
 
 	glEnable(GL_DEPTH_TEST);
 
-	screenShader.BindFBO();
-
 	const glm::vec3 viewPos = this->arcball.GetEyePos();
-	glm::mat4 cameraView;
-	glGetFloatv(GL_MODELVIEW_MATRIX, &cameraView[0][0]);
+	glm::mat4 modelView;
+	glGetFloatv(GL_MODELVIEW_MATRIX, &modelView[0][0]);
+
 	skyBoxShader.Use(viewPos);
-	glm::mat4 removeTranslateViewPos = glm::mat4(glm::mat3(cameraView)); // remove translation from the view matrix
+	glm::mat4 removeTranslateViewPos = glm::mat4(glm::mat3(modelView)); // remove translation from the view matrix
 	skyBox.Draw(&skyBoxShader, removeTranslateViewPos);
 	skyBoxShader.Unuse();
+
+	//modelShader.Draw(viewPos);
+
+
+	std::vector<glm::mat4> waveViewMats
+	{
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0),  glm::vec3(0, -1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),  glm::vec3(0, 0, 1)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1),  glm::vec3(0, -1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, -1, 0))
+	};
+
+	float aspect = w() / h();
+	glm::mat4 waveProjectionMat = glm::perspective(90.0f, aspect, 1.0f, 1000.0f);
+
+	//heightMapShader.BindFBO();
+	//for (int i = 0; i < 6; i++)
+	//{
+	//	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, heightMapShader.Fbos->fbo, 0);
+
+	//	/*draw skybox*/
+	//	{
+	//		glDepthFunc(GL_LEQUAL);
+	//		skyBoxShader.shader->Use();
+
+	//		skyBoxShader.shader->setMat4("u_projection", waveProjectionMat);
+	//		glm::mat4 _translateView = glm::mat4(glm::mat3(waveViewMats[i]));
+	//		skyBoxShader.shader->setMat4("u_view", _translateView);
+
+	//		glBindVertexArray(skyBoxShader.Vaos->vao);
+	//		glActiveTexture(GL_TEXTURE0 + 0);
+	//		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxShader.cubemapTexture);
+	//		skyBoxShader.GLDraw();
+	//		glDepthFunc(GL_LESS); // set depth function back to default
+	//		skyBoxShader.Unuse();
+	//	}
+
+	//	modelShader.shader->Use();
+	//	modelShader.shader->setVec3("viewPos", viewPos);
+	//	modelShader.shader->setFloat("material.shininess", 32.0f);
+	//	modelShader.shader->setMat4("projection", waveProjectionMat);
+	//	modelShader.shader->setMat4("view", waveViewMats[i]);
+
+	//	glm::mat4 modelMat = glm::mat4(1.0f);
+	//	modelMat = glm::translate(modelMat, glm::vec3(30.0f, 24.0f, 6.0f)); // translate it down so it's at the center of the scene
+	//	modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+	//	modelShader.shader->setMat4("model", modelMat);
+	//	modelShader.model->Draw(*modelShader.shader);
+	//}
+	//heightMapShader.UnBindFBO();
+
+	//heightMapShader.Use(viewPos);
+	//HeightWave.Draw(&heightMapShader, heightMapShader.Fbos->textures[0]);
+	//heightMapShader.Unuse();
 
 	//glStencilMask(0x00);
 
@@ -432,12 +454,8 @@ void TrainView::draw()
 	//boxShader.Use(viewPos);
 	//testCube.Draw(&boxShader);
 	
-	//modelShader.Draw(viewPos);
-
 	//cubeShader.Use(viewPos);
 	//cube.Draw(&cubeShader);
-
-	//glDisable(GL_CULL_FACE);
 
 	/*draw light*/ {
 		//lightCubeShader.Use(viewPos);
@@ -508,18 +526,7 @@ void TrainView::draw()
 		//}
 	};
 
-	heightMapShader.Use(viewPos);
-	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
-	heightMapShader.Unuse();
-
-	screenShader.UnBindFBO();
-	screenShader.Draw(glm::vec3(0));
-	screenShader.Unuse();
-
-	/*glClearColor(.1f, .1f, .1f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);*/
-
-	drawStuff(false);
+	//drawStuff(false);
 }
 
 void TrainView::GetPos(float const t, Pnt3f& pos, Pnt3f& orient)

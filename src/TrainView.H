@@ -145,6 +145,9 @@ public:
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
+
+
+		glBindVertexArray(0);
 	}
 
 	virtual void Use(glm::vec3 viewPos) override
@@ -178,7 +181,7 @@ public:
 	{
 		glBindVertexArray(shader->Vaos->vao);
 
-		glActiveTexture(GL_TEXTURE0 + shader->skyboxID);
+		glActiveTexture(GL_TEXTURE0 + 0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, shader->skyboxID);
 
 		// world transformation
@@ -187,6 +190,9 @@ public:
 		shader->shader->setMat4("model", model);
 
 		shader->GLDraw();
+
+		glActiveTexture(GL_TEXTURE0 + 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 };
 
@@ -256,6 +262,8 @@ public:
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 		glEnableVertexAttribArray(2);
+
+		glBindVertexArray(0);
 	}
 
 	virtual void Use(glm::vec3 viewPos) override
@@ -441,6 +449,8 @@ public:
 		//Element attribute
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_STATIC_DRAW);
+
+
 	}
 
 	virtual void Use(glm::vec3 viewPos) override
@@ -465,7 +475,68 @@ public:
 	virtual void UnBindTexture() override
 	{
 		Texture2D::unbind(0);
-		Texture2D::unbind(1);
+		glActiveTexture(GL_TEXTURE0 + 11);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
+public:
+	FBO* Fbos = nullptr;
+
+	void SetFBO()
+	{
+		if (this->Fbos == nullptr)
+			this->Fbos = new FBO;
+
+		glGenFramebuffers(1, &this->Fbos->fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+
+		glGenRenderbuffers(1, &this->Fbos->rbo);
+		
+		glGenBuffers(1, this->Fbos->textures);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, this->Fbos->textures[0]);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		for (int i = 0; i < 6; i++)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
+		}
+		glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->fbo);
+
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
+
+	void BindFBO()
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+
+		glViewport(0, 0, 590, 590);
+		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
+
+		// make sure we clear the framebuffer's content
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+
+	void UnBindFBO()
+	{
+		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		// disable depth test so screen-space quad isn't discarded due to depth test.
+		//glDisable(GL_DEPTH_TEST);
 	}
 };
 class HeightMapWave
@@ -478,8 +549,6 @@ class HeightMapWave
 public:
 	glm::vec3 Position = glm::vec3(0, 0, 0);
 
-	float WaveHeights[HeightWaveGridSize][HeightWaveGridSize];
-
 	/// <summary>
 	/// have to use shader first
 	/// </summary>
@@ -491,7 +560,7 @@ public:
 
 		glBindVertexArray(aShader->Vaos->vao);
 
-		glActiveTexture(GL_TEXTURE0 + 1);
+		glActiveTexture(GL_TEXTURE0 + 11);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
 
 		aShader->shader->setFloat("u_time", animateTimer);
@@ -679,6 +748,8 @@ public:
 		glEnableVertexAttribArray(0);					
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
 		glEnableVertexAttribArray(1);
+
+		glBindVertexArray(0);
 	}
 
 	void SetColor(glm::vec3 color)
@@ -749,7 +820,7 @@ public:
 
 		// render the loaded model
 		glm::mat4 modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(0.0f, -5.0f, 0.0f)); // translate it down so it's at the center of the scene
+		modelMat = glm::translate(modelMat, glm::vec3(30.0f, 24.0f, 6.0f)); // translate it down so it's at the center of the scene
 		modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 		shader->setMat4("model", modelMat);
 		model->Draw(*shader);
@@ -863,6 +934,8 @@ public:
 		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+		//glBindVertexArray(0);
 	}
 
 	virtual void InitShaderAttribute() override
@@ -884,6 +957,8 @@ public:
 	virtual void UnBindTexture() override
 	{
 		Texture2D::unbind(0);
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 };
 class SkyBox
@@ -899,7 +974,7 @@ public:
 
 		// skybox cube
 		glBindVertexArray(aShader->Vaos->vao);
-		glActiveTexture(GL_TEXTURE0 + 0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, aShader->cubemapTexture);
 		aShader->GLDraw();
 		glDepthFunc(GL_LESS); // set depth function back to default
@@ -1242,10 +1317,6 @@ class TrainView : public Fl_Gl_Window
 		{
 			heightMapShader.UpdataShader();
 			HeightWave.ResetAnimate();
-
-			boxShader.UpdataShader();
-			lineShader.UpdataShader();
-			roadShader.UpdataShader();
 		}
 
 		void Distance2T(float& _distance, int& _turnCounter, float& _trainU);
@@ -1290,19 +1361,8 @@ class TrainView : public Fl_Gl_Window
 		SkyBoxShader skyBoxShader;
 		SkyBox skyBox;
 
-		SkyboxCubeShader boxShader;
-		SkyboxTestCube testCube;
-
 		CubeShader cubeShader;
 		Cube cube;
-
-		ScreenShader screenShader;
-
-		BSplineGeometryShader lineShader;
-		BSpline line;
-
-		RoadShader roadShader;
-		Road road;
 
 		MapRoadShader mapRoadShader;
 		MapRoad mapRoad;
