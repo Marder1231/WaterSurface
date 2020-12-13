@@ -298,7 +298,7 @@ public:
 class Cube
 {
 public:
-	glm::vec3 Position = glm::vec3(0, 0, 0);
+	glm::vec3 Position = glm::vec3(0, 24, -26);
 
 	void Draw(CubeShader* shader)
 	{
@@ -312,7 +312,6 @@ public:
 		shader->GLDraw();
 	}
 };
-
 
 class HeightMapShader : public ObjectShader
 {
@@ -337,9 +336,9 @@ public:
 		if (this->Vaos == nullptr)
 			Vaos = new VAO;
 
-		const int clipAmount = 1600;
+		const int clipAmount = 400;
 
-		float size = 100;
+		float size = 10;
 
 		float sourceVertices[] = {
 			-size ,0.0f , -size,
@@ -462,7 +461,6 @@ public:
 		//加入光效
 		Environment::GetInstance()->lights.SetShader(shader);
 
-		shader->setVec3("RippleCenter", glm::vec3(0, 0, 0));
 		//轉到螢幕座標
 		SetModelView7ProjectionMatrix();
 	}
@@ -475,7 +473,7 @@ public:
 	virtual void UnBindTexture() override
 	{
 		Texture2D::unbind(0);
-		glActiveTexture(GL_TEXTURE0 + 11);
+		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 public:
@@ -489,33 +487,63 @@ public:
 		glGenFramebuffers(1, &this->Fbos->fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
 
-		glGenRenderbuffers(1, &this->Fbos->rbo);
-		
-		glGenBuffers(1, this->Fbos->textures);
+		glGenTextures(1, this->Fbos->textures);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, this->Fbos->textures[0]);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glGenFramebuffers(1, &this->Fbos->rbo);
 
 		for (int i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
 		}
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 		glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->fbo);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->rbo);
 
 		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 			cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+		//---------------------------------------------------------------
+		//glGenFramebuffers(1, &this->Fbos->fbo);
+		//glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+
+		//glGenBuffers(1, this->Fbos->textures);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, this->Fbos->textures[0]);
+		//for (int i = 0; i < 6; i++)
+		//{
+		//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0.1f, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
+		//}
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		//glGenRenderbuffers(1, &this->Fbos->rbo);
+		//glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
+		//glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->rbo);
+		//
+		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		//	cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
 	void BindFBO()
@@ -541,13 +569,185 @@ public:
 };
 class HeightMapWave
 {
-	int timer = 0;
-
 	const int WavePictureAmount= 200;
 
-	int animateTimer = 0;
-public:
+	int generateTime = 0;
+
+	int RainRipple_MaxAmount;
+	int RainRipple_LeaveTime = 24;
+public:	
+	int timer = 0;
+
+#pragma region RainEffect
+	class RainRipple
+	{
+		bool awake = true;
+	public:
+		glm::vec3 Position;
+		int RippleTime = -1;
+		RainRipple() { }
+		RainRipple(glm::vec3 _pos, int _time)
+		{
+			Position = _pos;
+			RippleTime = _time;
+		}
+
+		std::string Position2Shader(int _index)
+		{
+			std::string ret = "Ripples[" + std::to_string(_index) + "].GenerateCenter";
+
+			return ret;
+		}
+		std::string Time2Shader(int _index)
+		{
+			std::string ret = "Ripples[" + std::to_string(_index) + "].AnimateTime";
+
+			return ret;
+		}
+	};
 	glm::vec3 Position = glm::vec3(0, 0, 0);
+	static std::vector<RainRipple> RainRipples;
+
+	static void GenerateRipple(glm::vec3 _where, float _time);
+
+	class RainParticleShader : public ObjectShader
+	{
+		int numOfVertex = 0;
+	public:
+		virtual void InitShaderAttribute() override
+		{
+
+		}
+
+		virtual void SetVAO() override
+		{
+			throw new std::exception("Unuse");
+		}
+		void UpdateVAO(std::vector<float>& vertices, std::vector<float>& dirs)
+		{
+			numOfVertex = vertices.size() / 3;
+
+			glBindVertexArray(this->Vaos->vao);
+			glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[0]);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), vertices.data(), GL_DYNAMIC_DRAW);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(0);
+
+			glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, dirs.size() * sizeof(GLfloat), dirs.data(), GL_DYNAMIC_DRAW);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+			glEnableVertexAttribArray(1);
+		}
+		void SetVAO(std::vector<float>& vertices, std::vector<float>& dirs)
+		{
+			if (this->Vaos == nullptr)
+			{
+				this->Vaos = new VAO;
+
+				glGenVertexArrays(1, &this->Vaos->vao);
+				glGenBuffers(2, this->Vaos->vbo);
+			}
+
+			UpdateVAO(vertices, dirs);
+		}
+
+		virtual void Use(glm::vec3 _) override
+		{
+			this->shader->Use();
+
+			SetModelView7ProjectionMatrix();
+
+			glBindVertexArray(this->Vaos->vao);
+		}
+
+		virtual void GLDraw() override
+		{
+			glDrawArrays(GL_POINTS, 0, numOfVertex);
+		}
+	}rainParticleShader;
+
+	class CRainParticles
+	{
+		const float rainLength = 2.46f;
+		
+		int rainColding = 5;
+		int lastRain = 0;
+	public:
+		struct ParticleAttribute
+		{
+			glm::vec3 Position;
+			glm::vec3 Direction;
+			int GenerateTime;
+			int Life = 100;
+		};
+
+		std::vector<ParticleAttribute> particles;
+
+		void GenerateRain(int size, int _time)
+		{
+			if (_time - lastRain < rainColding)
+				return;
+
+			lastRain = _time;
+
+			for (int i = 0; i < size; i++)
+			{
+				glm::vec3 pos{
+					rand() % 246 - 123,
+					100,
+					rand() % 246 - 123 
+				};
+				glm::vec3 dir{
+					-0.246f + rand()%60 / 1200.0f,
+					(-1 * rand() % 5) / 5.0f,
+					-0.246f + rand() % 60 / 1200.0f,
+				};
+				glm::normalize(dir);
+
+				ParticleAttribute attribute;
+				attribute.Position = pos;
+				attribute.Direction = dir;
+				attribute.GenerateTime = _time;
+				particles.push_back(attribute);
+			}
+		}
+
+		void Attribute2VAO(RainParticleShader* aShader)
+		{
+			std::vector<float> vertices;
+			std::vector<float> directions;
+
+			for (int i = 0; i < particles.size(); i++)
+			{
+				vertices.push_back(particles[i].Position.x);	vertices.push_back(particles[i].Position.y);	vertices.push_back(particles[i].Position.z);
+				directions.push_back(particles[i].Direction.x);		directions.push_back(particles[i].Direction.y);		directions.push_back(particles[i].Direction.z);
+			}
+
+			aShader->SetVAO(vertices, directions);
+		}
+
+		void Draw(RainParticleShader* aShader)
+		{
+			aShader->GLDraw();
+		}
+
+		void DownDownBro(int _timer)
+		{
+			GenerateRain(1, _timer);
+			for (int i = 0; i < particles.size(); i++)
+			{
+				particles[i].GenerateTime = _timer;
+				particles[i].Position += rainLength * particles[i].Direction;
+
+				if (particles[i].Position.y <= 0)
+				{
+					HeightMapWave::GenerateRipple(particles[i].Position, _timer);
+					particles.erase(particles.begin() + i);
+				}
+			}
+		}
+	}RainParticles;
+#pragma endregion
 
 	/// <summary>
 	/// have to use shader first
@@ -560,14 +760,30 @@ public:
 
 		glBindVertexArray(aShader->Vaos->vao);
 
-		glActiveTexture(GL_TEXTURE0 + 11);
+		glActiveTexture(GL_TEXTURE0 + 1);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
+		glUniform1i(glGetUniformLocation(aShader->shader->ID, "material.u_skybox"), 1);
 
-		aShader->shader->setFloat("u_time", animateTimer);
+		aShader->shader->setInt("NumOfRipples", RainRipples.size());
+		aShader->shader->setInt("u_time", timer);
+
+		for (int i = RainRipples.size() - 1; i >= 0; i--)
+		{
+			if (timer - RainRipples[i].RippleTime > RainRipple_LeaveTime)
+			{
+				RainRipples.erase(RainRipples.begin() + i);
+				aShader->shader->setInt("NumOfRipples", RainRipples.size());
+				continue;
+			}
+
+			aShader->shader->setVec3(RainRipples[i].Position2Shader(i), RainRipples[i].Position);
+			aShader->shader->setInt(RainRipples[i].Time2Shader(i), RainRipples[i].RippleTime);
+		}
 
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, Position);
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(10, 10, 10));
 		
 		aShader->shader->setMat4("u_model", modelMatrix);
 
@@ -578,15 +794,8 @@ public:
 	void WaveGoGOo(int _speed)
 	{
 		timer += _speed;
-		animateTimer += _speed;
-
-		if (timer >= WavePictureAmount)
-			timer -= WavePictureAmount;
-	}
-
-	void ResetAnimate()
-	{
-		animateTimer = 0;
+		
+		RainParticles.DownDownBro(timer);
 	}
 };
 
@@ -820,7 +1029,7 @@ public:
 
 		// render the loaded model
 		glm::mat4 modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, glm::vec3(30.0f, 24.0f, 6.0f)); // translate it down so it's at the center of the scene
+		modelMat = glm::translate(modelMat, glm::vec3(0, 10, 0)); // translate it down so it's at the center of the scene
 		modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
 		shader->setMat4("model", modelMat);
 		model->Draw(*shader);
@@ -956,9 +1165,8 @@ public:
 
 	virtual void UnBindTexture() override
 	{
-		Texture2D::unbind(0);
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 };
 class SkyBox
@@ -1315,7 +1523,6 @@ class TrainView : public Fl_Gl_Window
 		void UpdataAllShader()
 		{
 			heightMapShader.UpdataShader();
-			HeightWave.ResetAnimate();
 		}
 
 		void Distance2T(float& _distance, int& _turnCounter, float& _trainU);

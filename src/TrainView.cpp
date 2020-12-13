@@ -46,6 +46,13 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+std::vector<HeightMapWave::RainRipple> HeightMapWave::RainRipples;
+void HeightMapWave::GenerateRipple(glm::vec3 _where, float _time)
+{
+	RainRipple rainRipple(_where, _time);
+	RainRipples.push_back(rainRipple);
+}
+
 //************************************************************************
 //
 // * Constructor to set up the GL window
@@ -288,6 +295,12 @@ void TrainView::draw()
 			}
 
 			heightMapShader.SetFBO();
+
+			HeightWave.rainParticleShader.SetShader("../src/shaders/RainParticles.vert",
+				nullptr, nullptr, "../src/shaders/RainParticles.geom",
+				"../src/shaders/RainParticles.frag");
+			HeightWave.RainParticles.GenerateRain(100, HeightWave.timer);
+			HeightWave.RainParticles.Attribute2VAO(&HeightWave.rainParticleShader);
 		}
 
 		if (lightCubeShader.shader == nullptr)
@@ -325,8 +338,10 @@ void TrainView::draw()
 	else
 		throw std::runtime_error("Could not initialize GLAD!");
 
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	// Set up the view port
-	glViewport(0,0,w(),h());
+	glViewport(0, 0, w(), h());
 
 	// clear the window, be sure to clear the Z-Buffer too
 	glClearColor(0,0,.3f,0);		// background should be blue
@@ -363,19 +378,14 @@ void TrainView::draw()
 
 	setupFloor();
 
-
-
 	//*********************************************************************
 	// now draw the object and we need to do it twice
 	// once for real, and then once for shadows
 	//*********************************************************************
 	setupObjects();
-	
-	//testShader.Draw(timer);
 
 	glClearColor(.1f, .1f, .1f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -390,28 +400,29 @@ void TrainView::draw()
 
 	//modelShader.Draw(viewPos);
 
+	cubeShader.Use(viewPos);
+	cube.Draw(&cubeShader);
+	cubeShader.Unuse();
 
 	std::vector<glm::mat4> waveViewMats
 	{
-		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0),  glm::vec3(0, -1, 0)),
-		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec3(0, -1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0),  glm::vec3(0, 1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(-1, 0, 0), glm::vec3(0, 1, 0)),
 		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0),  glm::vec3(0, 0, 1)),
 		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, -1, 0), glm::vec3(0, 0, -1)),
-		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1),  glm::vec3(0, -1, 0)),
-		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, -1, 0))
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1),  glm::vec3(0, 1, 0)),
+		glm::lookAt(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec3(0, 1, 0))
 	};
 
 	float aspect = w() / h();
-	glm::mat4 waveProjectionMat = glm::perspective(90.0f, aspect, 1.0f, 1000.0f);
+	glm::mat4 waveProjectionMat = glm::perspective(90.0f, aspect, .1f, 1000.0f);
 
 	//heightMapShader.BindFBO();
+
 	//for (int i = 0; i < 6; i++)
 	//{
-	//	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, heightMapShader.Fbos->fbo, 0);
-
 	//	/*draw skybox*/
 	//	{
-	//		glDepthFunc(GL_LEQUAL);
 	//		skyBoxShader.shader->Use();
 
 	//		skyBoxShader.shader->setMat4("u_projection", waveProjectionMat);
@@ -421,28 +432,45 @@ void TrainView::draw()
 	//		glBindVertexArray(skyBoxShader.Vaos->vao);
 	//		glActiveTexture(GL_TEXTURE0 + 0);
 	//		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxShader.cubemapTexture);
+	//		skyBoxShader.shader->setInt("skybox", 0);
+
 	//		skyBoxShader.GLDraw();
-	//		glDepthFunc(GL_LESS); // set depth function back to default
 	//		skyBoxShader.Unuse();
 	//	}
 
-	//	modelShader.shader->Use();
-	//	modelShader.shader->setVec3("viewPos", viewPos);
-	//	modelShader.shader->setFloat("material.shininess", 32.0f);
-	//	modelShader.shader->setMat4("projection", waveProjectionMat);
-	//	modelShader.shader->setMat4("view", waveViewMats[i]);
+	//	cubeShader.shader->Use();
+	//	cubeShader.shader->setVec3("viewPos", viewPos);
+	//	cubeShader.shader->setFloat("material.shininess", 32.0f);
 
-	//	glm::mat4 modelMat = glm::mat4(1.0f);
-	//	modelMat = glm::translate(modelMat, glm::vec3(30.0f, 24.0f, 6.0f)); // translate it down so it's at the center of the scene
-	//	modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-	//	modelShader.shader->setMat4("model", modelMat);
-	//	modelShader.model->Draw(*modelShader.shader);
+	//	Environment::GetInstance()->lights.SetShader(cubeShader.shader);
+
+	//	cubeShader.shader->setMat4("projection", waveProjectionMat);
+	//	cubeShader.shader->setMat4("view", waveViewMats[i]);
+	//	cubeShader.BindTextures();
+	//	glBindVertexArray(cubeShader.Vaos->vao);
+
+	//	glm::mat4 model = glm::mat4(1.0f);
+	//	model = glm::translate(model, cube.Position);
+	//	cubeShader.shader->setMat4("model", model);
+	//	cubeShader.GLDraw();
+	//	cubeShader.Unuse();
+
+	//	//modelShader.shader->Use();
+	//	//modelShader.shader->setVec3("viewPos", viewPos);
+	//	//modelShader.shader->setFloat("material.shininess", 32.0f);
+	//	//modelShader.shader->setMat4("projection", waveProjectionMat);
+	//	//modelShader.shader->setMat4("view", waveViewMats[i]);
+	//	//glm::mat4 modelMat = glm::mat4(1.0f);
+	//	//modelMat = glm::translate(modelMat, glm::vec3(0, 10, 0)); // translate it down so it's at the center of the scene
+	//	//modelShader.shader->setMat4("model", modelMat);
+	//	//modelShader.model->Draw(*modelShader.shader);
+
 	//}
 	//heightMapShader.UnBindFBO();
 
-	//heightMapShader.Use(viewPos);
-	//HeightWave.Draw(&heightMapShader, heightMapShader.Fbos->textures[0]);
-	//heightMapShader.Unuse();
+	heightMapShader.Use(viewPos);
+	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+	heightMapShader.Unuse();
 
 	//glStencilMask(0x00);
 
@@ -526,7 +554,7 @@ void TrainView::draw()
 		//}
 	};
 
-	//drawStuff(false);
+	drawStuff(false);
 }
 
 void TrainView::GetPos(float const t, Pnt3f& pos, Pnt3f& orient)
@@ -605,6 +633,11 @@ void TrainView::drawStuff(bool doingShadows)
 	mapRoadShader.Use(glm::vec3());
 	mapRoad.Draw(&mapRoadShader);
 	mapRoadShader.Unuse();
+
+	HeightWave.RainParticles.Attribute2VAO(&HeightWave.rainParticleShader);
+	HeightWave.rainParticleShader.Use(glm::vec3());
+	HeightWave.RainParticles.Draw(&HeightWave.rainParticleShader);
+	HeightWave.rainParticleShader.Unuse();
 
 	//lineShader.Use(glm::vec3());
 	//lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());

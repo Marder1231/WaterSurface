@@ -170,6 +170,15 @@
     <None Include="..\src\shaders\MapRoad.vert">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\src\shaders\RainParticles.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\RainParticles.vert">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\src\shaders\RainParticles.geom">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

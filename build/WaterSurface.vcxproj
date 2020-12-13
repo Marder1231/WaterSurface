@@ -339,6 +339,9 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <None Include="..\src\shaders\MapRoad.vert" />
     <None Include="..\src\shaders\model.frag" />
     <None Include="..\src\shaders\model.vert" />
+    <None Include="..\src\shaders\RainParticles.frag" />
+    <None Include="..\src\shaders\RainParticles.geom" />
+    <None Include="..\src\shaders\RainParticles.vert" />
     <None Include="..\src\shaders\RayCast.frag" />
     <None Include="..\src\shaders\RayCast.vert" />
     <None Include="..\src\shaders\Road.frag" />
