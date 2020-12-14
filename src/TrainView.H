@@ -326,6 +326,7 @@ public:
 		shader->setInt("material.u_skybox", 0);
 	}
 
+	unsigned int instanceRainVBO;
 	/// <summary>
 	/// create data : 2020.12.01 - 17:43
 	/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/TrainView.cpp  
@@ -333,12 +334,9 @@ public:
 	/// </summary>
 	virtual void SetVAO() override
 	{
-		if (this->Vaos == nullptr)
-			Vaos = new VAO;
-
 		const int clipAmount = 400;
 
-		float size = 10;
+		float size = 1;
 
 		float sourceVertices[] = {
 			-size ,0.0f , -size,
@@ -424,7 +422,10 @@ public:
 			TyCurr += TyInc;
 		}
 
-		this->Vaos = new VAO;
+
+		if (this->Vaos == nullptr)
+			Vaos = new VAO;
+
 		this->Vaos->element_amount = elements.size();
 
 		glGenVertexArrays(1, &this->Vaos->vao);
@@ -574,7 +575,7 @@ class HeightMapWave
 	int generateTime = 0;
 
 	int RainRipple_MaxAmount;
-	int RainRipple_LeaveTime = 24;
+	int RainRipple_LeaveTime = 6;
 public:	
 	int timer = 0;
 
@@ -699,7 +700,7 @@ public:
 				};
 				glm::vec3 dir{
 					-0.246f + rand()%60 / 1200.0f,
-					(-1 * rand() % 5) / 5.0f,
+					6.24f * (-1 * rand() % 5 + 1) / 5.0f,
 					-0.246f + rand() % 60 / 1200.0f,
 				};
 				glm::normalize(dir);
@@ -733,7 +734,7 @@ public:
 
 		void DownDownBro(int _timer)
 		{
-			GenerateRain(1, _timer);
+			GenerateRain(60, _timer);
 			for (int i = 0; i < particles.size(); i++)
 			{
 				particles[i].GenerateTime = _timer;
@@ -741,7 +742,11 @@ public:
 
 				if (particles[i].Position.y <= 0)
 				{
-					HeightMapWave::GenerateRipple(particles[i].Position, _timer);
+					if (particles[i].Position.x <= 100 && particles[i].Position.x >= -100 &&
+						particles[i].Position.z <= 100 && particles[i].Position.z >= -100)
+					{
+						HeightMapWave::GenerateRipple(particles[i].Position, _timer);
+					}
 					particles.erase(particles.begin() + i);
 				}
 			}
@@ -753,7 +758,7 @@ public:
 	/// have to use shader first
 	/// </summary>
 	/// <param name="aShader"></param>
-	virtual void Draw(ObjectShader* aShader, unsigned int reflectSkyTextureID)
+	virtual void Draw(HeightMapShader* aShader, unsigned int reflectSkyTextureID, glm::vec3 viewPos)
 	{
 		aShader->textures[timer % WavePictureAmount]->bind(0);
 		glUniform1i(glGetAttribLocation(aShader->shader->ID, "u_heightMap"), 0);
@@ -764,12 +769,15 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, reflectSkyTextureID);
 		glUniform1i(glGetUniformLocation(aShader->shader->ID, "material.u_skybox"), 1);
 
+		std::vector<RainRipple> canSeeRipple;
+
 		aShader->shader->setInt("NumOfRipples", RainRipples.size());
 		aShader->shader->setInt("u_time", timer);
 
 		for (int i = RainRipples.size() - 1; i >= 0; i--)
 		{
-			if (timer - RainRipples[i].RippleTime > RainRipple_LeaveTime)
+			if (timer - RainRipples[i].RippleTime > RainRipple_LeaveTime || 
+				glm::length(viewPos - RainRipples[i].Position) > 1000)
 			{
 				RainRipples.erase(RainRipples.begin() + i);
 				aShader->shader->setInt("NumOfRipples", RainRipples.size());
@@ -783,7 +791,7 @@ public:
 		//world transformation
 		glm::mat4 modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::translate(modelMatrix, Position);
-		modelMatrix = glm::scale(modelMatrix, glm::vec3(10, 10, 10));
+		modelMatrix = glm::scale(modelMatrix, glm::vec3(100, 100, 100));
 		
 		aShader->shader->setMat4("u_model", modelMatrix);
 
@@ -887,7 +895,6 @@ public:
 class LightCubeShader
 {
 public:
-	
 	Shader* shader = nullptr;
 
 	VAO Vao;

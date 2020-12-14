@@ -468,15 +468,17 @@ void TrainView::draw()
 	//}
 	//heightMapShader.UnBindFBO();
 
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+
 	heightMapShader.Use(viewPos);
-	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture);
+	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture, viewPos);
 	heightMapShader.Unuse();
 
-	//glStencilMask(0x00);
+	glDisable(GL_CULL_FACE);
 
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-	//glFrontFace(GL_CCW);
+	glStencilMask(0x00);
 
 	//std::cout << "view pos x : " << viewPos.x << ", y : " << viewPos.y << ", z : " << viewPos.z << std::endl;
 	//boxShader.Use(viewPos);
@@ -485,75 +487,80 @@ void TrainView::draw()
 	//cubeShader.Use(viewPos);
 	//cube.Draw(&cubeShader);
 
-	/*draw light*/ {
-		//lightCubeShader.Use(viewPos);
-		//Environment* instance = Environment::GetInstance();
-		//Lighting::BaseLight* nowChoiceLight = nullptr;
-		//for (auto& light : instance->lights.Lightings)
-		//{
-		//	//record now pick light
-		//	if (tw->lightingWidget->nowChooseLightIndex != -1 && light.second->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
-		//	{
-		//		//¼g¤J¼ÒªO
-		//		glStencilFunc(GL_ALWAYS, 1, 0xff);
-		//		glStencilMask(0xff);
-		//		nowChoiceLight = light.second;
-		//	}
-		//	else
-		//	{
-		//		glStencilMask(0x00);
-		//	}
+	/*draw light*/ 
+	if(tw->ChoiceWhichGameObjectAttribute->value() == int(TrainWindow::EmObjectChoice::Lighting))
+	{
+		lightCubeShader.Use(viewPos);
+		Environment* instance = Environment::GetInstance();
+		Lighting::BaseLight* nowChoiceLight = nullptr;
+		for (auto& light : instance->lights.Lightings)
+		{
+			//record now pick light
+			if (tw->lightingWidget->nowChooseLightIndex != -1 && light.second->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+			{
+				//¼g¤J¼ÒªO
+				glStencilFunc(GL_ALWAYS, 1, 0xff);
+				glStencilMask(0xff);
+				nowChoiceLight = light.second;
+			}
+			else
+			{
+				glStencilMask(0x00);
+			}
 
-		//	if (light.second->Type == Lighting::EmLightType::Point)
-		//	{
-		//		Lighting::PointLight* pointLight = static_cast<Lighting::PointLight*>(light.second);
-		//		lightCubeShader.SetColor(glm::vec3(1, 1, 1));
-		//		lightCubeShader.Draw(pointLight->GetPosition());
-		//	}
-		//	else if (light.second->Type == Lighting::EmLightType::Spot)
-		//	{
-		//		Lighting::SpotLight* spotLight = static_cast<Lighting::SpotLight*>(light.second);
-		//		lightCubeShader.SetColor(glm::vec3(1, 1, 1));
-		//		lightCubeShader.Draw(spotLight->GetPosition());
+			if (light.second->Type == Lighting::EmLightType::Point)
+			{
+				Lighting::PointLight* pointLight = static_cast<Lighting::PointLight*>(light.second);
+				lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+				lightCubeShader.Draw(pointLight->GetPosition());
+			}
+			else if (light.second->Type == Lighting::EmLightType::Spot)
+			{
+				Lighting::SpotLight* spotLight = static_cast<Lighting::SpotLight*>(light.second);
+				lightCubeShader.SetColor(glm::vec3(1, 1, 1));
+				lightCubeShader.Draw(spotLight->GetPosition());
 
-		//		glm::vec3 rayDirection = spotLight->GetDirection();
+				glm::vec3 rayDirection = spotLight->GetDirection();
 
-		//		//draw raycast
-		//		glPushMatrix();
-		//		glBegin(GL_LINES);
-		//		if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
-		//			glColor3f(1, 1, 0);
-		//		else
-		//			glColor3f(0, 1, 1);
-		//		glVertex3f(0, 0, 0);
-		//		glVertex3f(6.24 * rayDirection.x, 6.24 * rayDirection.y, 6.24 * rayDirection.z);
-		//		glEnd();
-		//		glPopMatrix();
-		//	}
-		//}
+				//draw raycast
+				glPushMatrix();
+				glBegin(GL_LINES);
+				if (tw->lightingWidget->nowChooseLightIndex != -1 && spotLight->ID == tw->lightingWidget->LightListIDs[tw->lightingWidget->nowChooseLightIndex])
+					glColor3f(1, 1, 0);
+				else
+					glColor3f(0, 1, 1);
+				glVertex3f(0, 0, 0);
+				glVertex3f(6.24 * rayDirection.x, 6.24 * rayDirection.y, 6.24 * rayDirection.z);
+				glEnd();
+				glPopMatrix();
+			}
+		}
 
-		//glStencilFunc(GL_NOTEQUAL, 1, 0xff);
-		//glStencilMask(0x00);
-		//glDisable(GL_DEPTH_TEST);
+		glStencilFunc(GL_NOTEQUAL, 1, 0xff);
+		glStencilMask(0x00);
+		glDisable(GL_DEPTH_TEST);
 
-		//lightCubeShader.Use(viewPos);
-		//glm::vec3 scale = glm::vec3(1.1f, 1.1f, 1.1f);
-		//lightCubeShader.SetColor(glm::vec3(1, 0, 0));
-		//if (nowChoiceLight != nullptr)
-		//{
-		//	if (nowChoiceLight->Type == Lighting::EmLightType::Point)
-		//	{
-		//		Lighting::PointLight* _light = static_cast<Lighting::PointLight*>(nowChoiceLight);
-		//		lightCubeShader.Draw(_light->GetPosition(), scale);
-		//	}
-		//	else if (nowChoiceLight->Type == Lighting::EmLightType::Spot)
-		//	{
-		//		Lighting::SpotLight* _light = static_cast<Lighting::SpotLight*>(nowChoiceLight);
-		//		lightCubeShader.Draw(_light->GetPosition(), scale);
-		//	}
-		//}
+		lightCubeShader.Use(viewPos);
+		glm::vec3 scale = glm::vec3(1.1f, 1.1f, 1.1f);
+		lightCubeShader.SetColor(glm::vec3(1, 0, 0));
+		if (nowChoiceLight != nullptr)
+		{
+			if (nowChoiceLight->Type == Lighting::EmLightType::Point)
+			{
+				Lighting::PointLight* _light = static_cast<Lighting::PointLight*>(nowChoiceLight);
+				lightCubeShader.Draw(_light->GetPosition(), scale);
+			}
+			else if (nowChoiceLight->Type == Lighting::EmLightType::Spot)
+			{
+				Lighting::SpotLight* _light = static_cast<Lighting::SpotLight*>(nowChoiceLight);
+				lightCubeShader.Draw(_light->GetPosition(), scale);
+			}
+		}
+		lightCubeShader.shader->Unuse();
+		glBindVertexArray(0);
 	};
 
+	glDisable(GL_CULL_FACE);
 	drawStuff(false);
 }
 

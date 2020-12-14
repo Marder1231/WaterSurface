@@ -5,6 +5,23 @@ layout(triangles, equal_spacing, ccw)in;
 in vec3 e_position[];
 in vec2 e_textCoords[];
 
+//struct RippleAttribute
+//{
+//	vec3 GenerateCenter;
+//	int AnimateTime;
+//};
+//in int c_rippleSize[];
+//in RippleAttribute c_majorRipples[][];
+
+#define MAX_RIPPLE_AMOUNT 100
+struct RippleAttribute
+{
+	vec3 GenerateCenter;
+	int AnimateTime;
+};
+uniform int NumOfRipples;
+uniform RippleAttribute Ripples[MAX_RIPPLE_AMOUNT];
+
 out vec3 f_position;
 out vec2 f_textCoords;
 
@@ -15,14 +32,7 @@ uniform sampler2D u_heightMap;
 
 uniform int u_time;
 
-#define MAX_RIPPLE_AMOUNT 100
-struct RippleAttribute
-{
-	vec3 GenerateCenter;
-	int AnimateTime;
-};
-uniform int NumOfRipples;
-uniform RippleAttribute Ripples[MAX_RIPPLE_AMOUNT];
+uniform vec3 u_cameraPos;
 
 //reference : http://www.zwqxin.com/archives/opengl/water-simulation-3.html
 float Cal_Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
@@ -84,6 +94,21 @@ void main(void)
 			p.y += circleHeight;
 //		p.y += 0.1f;
 	}
+
+//	for(int i = 0; i < c_rippleSize[0]; i++)
+//	{
+//		if(c_majorRipples[0][i].AnimateTime == -1)
+//			continue;
+//		
+//		vec3 ripplePos = c_majorRipples[0][i].GenerateCenter;
+//		ripplePos.y = f_position.y;
+//		
+//		float circleHeight = CircleWave(length(ripplePos- f_position), amplitude, u_time - c_majorRipples[0][i].AnimateTime);
+//		
+//		if(circleHeight >= 0.024f)
+//			p.y += circleHeight;
+////		p.y += 0.1f;
+//	}
 	f_position = p;
 
 	gl_Position = u_projection * u_view * vec4(f_position, 1);
