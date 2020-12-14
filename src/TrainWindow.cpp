@@ -69,6 +69,7 @@ TrainWindow(const int x, const int y)
 		ChoiceWhichGameObjectAttribute = new Fl_Choice(700, pty, 60, 24);
 		ChoiceWhichGameObjectAttribute->add("lighting");
 		ChoiceWhichGameObjectAttribute->add("Object");
+		ChoiceWhichGameObjectAttribute->add("Wave");
 
 		choiceWhichObjectAttributeButton = new Fl_Button(700, pty + 30, 24, 24, "Select Obj");
 		choiceWhichObjectAttributeButton->callback((Fl_Callback*)ChoiceWhichOAttributeCB, this);
@@ -80,6 +81,10 @@ TrainWindow(const int x, const int y)
 		objectWidget = new ObjectWidget(605, pty, 190, 590);
 		this->add(objectWidget);
 		objectWidget->hide();
+		
+		waveWidget = new WaveWidget(605, pty, 190, 590);
+		this->add(waveWidget);
+		waveWidget->hide();
 
 #ifdef EXAMPLE_SOLUTION
 		makeExampleWidgets(this,pty);
@@ -113,7 +118,6 @@ togglify(Fl_Button* b, int val)
 
 void TrainWindow::UpdataShader()
 {
-	//$$$ updata all shader
 	trainView->UpdataAllShader();
 }
 
@@ -390,7 +394,8 @@ advanceTrain(float dir)
 {
 	//#####################################################################
 	// TODO: make this work for your train
-	trainView->HeightWave.WaveGoGOo(1);
+	trainView->HeightWave.WaveGoGOo(this->waveWidget->speed->value() + 1, this->waveWidget->rainSize->value() * 10);
+	this->waveWidget->rainSize->damage();
 
 	trainView->m_pTrack->trainU += 0.01f;
 	while (trainView->m_pTrack->trainU >= 1.0f)

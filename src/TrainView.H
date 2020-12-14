@@ -298,7 +298,7 @@ public:
 class Cube
 {
 public:
-	glm::vec3 Position = glm::vec3(0, 24, -26);
+	glm::vec3 Position = glm::vec3(60, 24, 0);
 
 	void Draw(CubeShader* shader)
 	{
@@ -326,7 +326,6 @@ public:
 		shader->setInt("material.u_skybox", 0);
 	}
 
-	unsigned int instanceRainVBO;
 	/// <summary>
 	/// create data : 2020.12.01 - 17:43
 	/// reference : https://github.com/h2570su/WaterSurface/blob/master/src/TrainView.cpp  
@@ -478,78 +477,42 @@ public:
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 public:
-	FBO* Fbos = nullptr;
+	unsigned int Fbos[6];
+	unsigned int FboTexture;
+	unsigned int Rbo;
 
 	void SetFBO()
 	{
-		if (this->Fbos == nullptr)
-			this->Fbos = new FBO;
+		glGenTextures(1, &FboTexture);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, FboTexture);
 
-		glGenFramebuffers(1, &this->Fbos->fbo);
-		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+		glGenFramebuffers(6, Fbos);
+		glGenFramebuffers(1, &Rbo);
 
-		glGenTextures(1, this->Fbos->textures);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, this->Fbos->textures[0]);
-		glGenFramebuffers(1, &this->Fbos->rbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, Rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, Rbo);
 
 		for (int i = 0; i < 6; i++)
 		{
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glBindFramebuffer(GL_FRAMEBUFFER, Fbos[i]);
 
-			glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0.1, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, FboTexture, 0);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-		glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
-		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->rbo);
-
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-		//---------------------------------------------------------------
-		//glGenFramebuffers(1, &this->Fbos->fbo);
-		//glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
-
-		//glGenBuffers(1, this->Fbos->textures);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, this->Fbos->textures[0]);
-		//for (int i = 0; i < 6; i++)
-		//{
-		//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, 590, 590, 0.1f, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-		//	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->Fbos->textures[0], 0);
-		//}
-		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP);
-		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		//glGenRenderbuffers(1, &this->Fbos->rbo);
-		//glBindRenderbuffer(GL_RENDERBUFFER, this->Fbos->rbo);
-		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 590, 590);
-		//glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, this->Fbos->rbo);
-		//
-		//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		//	cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << endl;
-
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
-	void BindFBO()
+	void BindFBO(int index)
 	{
-		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos->fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, this->Fbos[index]);
 
 		glViewport(0, 0, 590, 590);
 		glEnable(GL_DEPTH_TEST); // enable depth testing (is disabled for rendering screen-space quad)
@@ -563,7 +526,7 @@ public:
 	{
 		// now bind back to default framebuffer and draw a quad plane with the attached framebuffer color texture
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		// disable depth test so screen-space quad isn't discarded due to depth test.
 		//glDisable(GL_DEPTH_TEST);
 	}
@@ -700,7 +663,7 @@ public:
 				};
 				glm::vec3 dir{
 					-0.246f + rand()%60 / 1200.0f,
-					6.24f * (-1 * rand() % 5 + 1) / 5.0f,
+					6.24f * (-1 * (rand() % 5 + 1)) / 5.0f,
 					-0.246f + rand() % 60 / 1200.0f,
 				};
 				glm::normalize(dir);
@@ -732,9 +695,9 @@ public:
 			aShader->GLDraw();
 		}
 
-		void DownDownBro(int _timer)
+		void DownDownBro(int rainSize, int _timer)
 		{
-			GenerateRain(60, _timer);
+			GenerateRain(rainSize, _timer);
 			for (int i = 0; i < particles.size(); i++)
 			{
 				particles[i].GenerateTime = _timer;
@@ -799,11 +762,11 @@ public:
 		aShader->GLDraw();
 	}
 
-	void WaveGoGOo(int _speed)
+	void WaveGoGOo(int _speed, int rainSize)
 	{
 		timer += _speed;
 		
-		RainParticles.DownDownBro(timer);
+		RainParticles.DownDownBro(rainSize, timer);
 	}
 };
 
@@ -1293,6 +1256,11 @@ public:
 		glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	}
 
+	virtual void UnBindTexture()
+	{
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	virtual void Draw(glm::vec3 _)
 	{
 		this->shader->Use();
@@ -1304,8 +1272,6 @@ public:
 		glBindTexture(GL_TEXTURE_2D, this->Fbos->textures[0]);
 		this->GLDraw();
 		glEnable(GL_DEPTH_TEST);
-
-		Texture2D::unbind(0);
 	}
 };
 
@@ -1442,7 +1408,7 @@ public:
 		throw new std::exception("Unuse");
 	}
 
-	void UpdateVAO(std::vector<float>& vertices, std::vector<int>& elements)
+	void UpdateVAO(std::vector<float>& vertices, std::vector<int>& elements, std::vector<float>& texCoords)
 	{
 		this->Vaos->element_amount = elements.size();
 		glBindVertexArray(this->Vaos->vao);
@@ -1453,11 +1419,17 @@ public:
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 
+		//textureCoords attribute
+		glBindBuffer(GL_ARRAY_BUFFER, this->Vaos->vbo[1]);
+		glBufferData(GL_ARRAY_BUFFER, texCoords.size() * sizeof(GLfloat), texCoords.data(), GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(1);
+
 		//Element attribute
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->Vaos->ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, elements.size() * sizeof(GLint), elements.data(), GL_DYNAMIC_DRAW);
 	}
-	void SetVAO(std::vector<float>& vertices, std::vector<int>& elements)
+	void SetVAO(std::vector<float>& vertices, std::vector<int>& elements, std::vector<float>& texCoords)
 	{
 		if (this->Vaos == nullptr)
 		{
@@ -1465,12 +1437,12 @@ public:
 
 			this->Vaos->element_amount = elements.size();
 			glGenVertexArrays(1, &this->Vaos->vao);
-			glGenBuffers(1, this->Vaos->vbo);
+			glGenBuffers(2, this->Vaos->vbo);
 			glGenBuffers(1, &this->Vaos->ebo);
 		}
 		else
 		{
-			UpdateVAO(vertices, elements);
+			UpdateVAO(vertices, elements, texCoords);
 		}
 	}
 
@@ -1479,6 +1451,8 @@ public:
 		this->shader->Use();
 
 		this->SetModelView7ProjectionMatrix();
+
+		this->BindTextures();
 
 		glBindVertexArray(this->Vaos->vao);
 	}
@@ -1530,6 +1504,7 @@ class TrainView : public Fl_Gl_Window
 		void UpdataAllShader()
 		{
 			heightMapShader.UpdataShader();
+			screenShader.UpdataShader();
 		}
 
 		void Distance2T(float& _distance, int& _turnCounter, float& _trainU);
@@ -1579,4 +1554,6 @@ class TrainView : public Fl_Gl_Window
 
 		MapRoadShader mapRoadShader;
 		MapRoad mapRoad;
+
+		ScreenShader screenShader;
 };

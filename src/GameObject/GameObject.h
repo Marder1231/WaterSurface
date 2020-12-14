@@ -417,11 +417,10 @@ public:
 				}
 				else
 					throw new std::exception("error light type");
-
-				shader->setInt("u_PointLightAmount", pointCounter);
-				shader->setInt("u_DirLightAmount", dirCounter);
-				shader->setInt("u_SpotLightAmount", spotCounter);
 			}
+			shader->setInt("u_PointLightAmount", pointCounter);
+			shader->setInt("u_DirLightAmount", dirCounter);
+			shader->setInt("u_SpotLightAmount", spotCounter);
 
 			/*at liast setting once time*/ 
 			[=](Shader* _shader) mutable -> void

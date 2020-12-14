@@ -58,6 +58,69 @@ class TrainView;
 
 #define CHANGEATTRIBUTE_MAXSIZE 3
 
+class WaveWidget : public Fl_Group
+{
+	const int X = 0;
+	const int Y = 1;
+	const int Z = 2;
+public:
+
+	Fl_Browser* WaveType = nullptr;
+
+	Fl_Value_Slider* amplitude = nullptr;
+	Fl_Value_Slider* speed = nullptr;
+	Fl_Value_Slider* rainSize = nullptr;
+
+	enum class EmWaveType : int
+	{
+		Sin = 0,
+		Height = 1,
+	};
+	EmWaveType NowChoiceWaveType = EmWaveType::Height;
+	void ChooseWaveType(int value)
+	{
+		NowChoiceWaveType = EmWaveType(value);
+	}
+
+	WaveWidget(int _x, int _y, int _z, int _w) : Fl_Group(_x, _y, _z, _w)
+	{
+		this->begin();
+
+		int pty = y();
+
+		pty += 76;
+		WaveType = new Fl_Browser(605, pty, 80, 124, "Wave Type");
+		WaveType->add("Sin");
+		WaveType->add("Height");
+		WaveType->type(1);
+		WaveType->callback((Fl_Callback*)ChooseWaveTypeCB, this);
+
+		pty += 124 + 10;
+		amplitude = new Fl_Value_Slider(700, pty, 100, 20, "Amplitude");
+		amplitude->range(0, 10);
+		amplitude->value(0.24);
+		amplitude->align(FL_ALIGN_LEFT);
+		amplitude->type(FL_HORIZONTAL);
+
+		pty += 20 + 10;
+		speed = new Fl_Value_Slider(700, pty, 100, 20, "Speed");
+		speed->range(0, 10);
+		speed->value(2.46f);
+		speed->align(FL_ALIGN_LEFT);
+		speed->type(FL_HORIZONTAL);
+
+		pty += 20 + 10;
+		rainSize = new Fl_Value_Slider(700, pty, 100, 20, "Rain Size");
+		rainSize->range(0, 10);
+		rainSize->value(0);
+		rainSize->align(FL_ALIGN_LEFT);
+		rainSize->type(FL_HORIZONTAL);
+
+		this->end();
+	}
+};
+
+
 class ObjectWidget : public Fl_Group
 {
 	const int ChangeSize = 1;
@@ -451,20 +514,22 @@ public:
 	
 	//------------------GameObejct attribute widget-----------
 #pragma region GameObjectAttributeWidget
-private:
-	int nowChoiceAttribute = -1;
 
 public:
+	int nowChoiceAttribute = -1;
+
 	enum class EmObjectChoice : int
 	{
 		Lighting = 0,
 		Object = 1,
+		Wave = 2,
 	};
 	Fl_Choice* ChoiceWhichGameObjectAttribute;
 	Fl_Button* choiceWhichObjectAttributeButton;
 
 	LightingWidget* lightingWidget;
 	ObjectWidget* objectWidget;
+	WaveWidget* waveWidget;
 
 public:
 	void ShowWhichObjectAttribute()
@@ -475,13 +540,22 @@ public:
 			return;
 
 		//$$$ hide now choice
+		lightingWidget->hide();
+		objectWidget->hide();
+		waveWidget->hide();
 
 		switch (nowChoiceAttribute)
 		{
-			case 0:
+		case int(EmObjectChoice::Lighting):
 			{
 				lightingWidget->show();
 			}break;
+		case int(EmObjectChoice::Wave):
+			{
+				waveWidget->show();
+			}break;
+		default:
+			break;
 		}
 		//show object
 	}

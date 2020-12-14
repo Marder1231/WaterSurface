@@ -75,6 +75,12 @@ void UpdataShaderCB(Fl_Button* w, TrainWindow* tw)
 {
 	tw->UpdataShader();
 }
+
+void ChooseWaveTypeCB(Fl_Browser* w, WaveWidget* ww)
+{
+	ww->ChooseWaveType(w->value() - 1);
+}
+
 #pragma region LightWidget
 
 void ChooseWhichLightsCB(Fl_Browser* w, LightingWidget* lw)

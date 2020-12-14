@@ -330,7 +330,17 @@ void TrainView::draw()
 			mapRoadShader.SetShader("../src/shaders/MapRoad.vert",
 				nullptr, nullptr, nullptr,
 				"../src/shaders/MapRoad.frag");
+			mapRoadShader.AddTexture("../Images/Road.png");
 			ComputeDistance();
+		}
+
+		if (screenShader.shader == nullptr)
+		{
+			screenShader.SetShader("../src/shaders/ScreenShader.vert",
+				nullptr, nullptr, nullptr,
+				"../src/shaders/ScreenShader.frag");
+			screenShader.SetVAO();
+			screenShader.SetFBO();
 		}
 #pragma endregion 
 
@@ -417,10 +427,10 @@ void TrainView::draw()
 	float aspect = w() / h();
 	glm::mat4 waveProjectionMat = glm::perspective(90.0f, aspect, .1f, 1000.0f);
 
-	//heightMapShader.BindFBO();
-
 	//for (int i = 0; i < 6; i++)
 	//{
+	//	heightMapShader.BindFBO(i);
+
 	//	/*draw skybox*/
 	//	{
 	//		skyBoxShader.shader->Use();
@@ -465,14 +475,20 @@ void TrainView::draw()
 	//	//modelShader.shader->setMat4("model", modelMat);
 	//	//modelShader.model->Draw(*modelShader.shader);
 
+	//	heightMapShader.UnBindFBO();
 	//}
-	//heightMapShader.UnBindFBO();
 
+	HeightWave.RainParticles.Attribute2VAO(&HeightWave.rainParticleShader);
+	HeightWave.rainParticleShader.Use(glm::vec3());
+	HeightWave.RainParticles.Draw(&HeightWave.rainParticleShader);
+	HeightWave.rainParticleShader.Unuse();
+	
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
-
 	heightMapShader.Use(viewPos);
+	heightMapShader.shader->setFloat("u_amplitude", tw->waveWidget->amplitude->value());
+	heightMapShader.shader->setInt("u_chooseWaveType", int(tw->waveWidget->NowChoiceWaveType));
 	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture, viewPos);
 	heightMapShader.Unuse();
 
@@ -488,7 +504,7 @@ void TrainView::draw()
 	//cube.Draw(&cubeShader);
 
 	/*draw light*/ 
-	if(tw->ChoiceWhichGameObjectAttribute->value() == int(TrainWindow::EmObjectChoice::Lighting))
+	if(tw->nowChoiceAttribute == int(TrainWindow::EmObjectChoice::Lighting))
 	{
 		lightCubeShader.Use(viewPos);
 		Environment* instance = Environment::GetInstance();
@@ -558,10 +574,12 @@ void TrainView::draw()
 		}
 		lightCubeShader.shader->Unuse();
 		glBindVertexArray(0);
-	};
-
-	glDisable(GL_CULL_FACE);
-	drawStuff(false);
+	}
+	else if (tw->nowChoiceAttribute == int(TrainWindow::EmObjectChoice::Object))
+	{
+		glDisable(GL_CULL_FACE);
+		drawStuff(false);
+	}
 }
 
 void TrainView::GetPos(float const t, Pnt3f& pos, Pnt3f& orient)
@@ -640,11 +658,6 @@ void TrainView::drawStuff(bool doingShadows)
 	mapRoadShader.Use(glm::vec3());
 	mapRoad.Draw(&mapRoadShader);
 	mapRoadShader.Unuse();
-
-	HeightWave.RainParticles.Attribute2VAO(&HeightWave.rainParticleShader);
-	HeightWave.rainParticleShader.Use(glm::vec3());
-	HeightWave.RainParticles.Draw(&HeightWave.rainParticleShader);
-	HeightWave.rainParticleShader.Unuse();
 
 	//lineShader.Use(glm::vec3());
 	//lineShader.shader->setInt("u_ControlPointAmount", m_pTrack->points.size());
@@ -936,12 +949,22 @@ void TrainView::ComputeDistance()
 	Pnt3f cpso;
 	GetPos(0, cps, cpso);
 
+	float sourceCoords[] = {
+		-1.0f, -1.0f,
+		1.0f, -1.0f,
+		-1.0f, 1.0f,
+
+		1.0f, -1.0f,
+		-1.0f, 1.0f,
+		1.0f, 1.0f
+	};
 	float sourceElement[] = {
 	0, 1, 2,
 	1, 2, 3
 	};
 	std::vector<float> vertices;
 	std::vector<int> elements;
+	std::vector<float> texCorrdss;
 
 	for (int i = 0; i < m_pTrack->points.size(); i++)
 	{
@@ -994,6 +1017,11 @@ void TrainView::ComputeDistance()
 			vertices.push_back(newVertices[6]);  vertices.push_back(newVertices[7]);  vertices.push_back(newVertices[8]);
 			vertices.push_back(newVertices[9]);  vertices.push_back(newVertices[10]);  vertices.push_back(newVertices[11]);
 
+			texCorrdss.push_back(sourceCoords[0]);	texCorrdss.push_back(sourceCoords[1]);	texCorrdss.push_back(sourceCoords[2]);	
+			texCorrdss.push_back(sourceCoords[3]);	texCorrdss.push_back(sourceCoords[4]);	texCorrdss.push_back(sourceCoords[5]);
+			texCorrdss.push_back(sourceCoords[6]);	texCorrdss.push_back(sourceCoords[7]);	texCorrdss.push_back(sourceCoords[8]);
+			texCorrdss.push_back(sourceCoords[9]);	texCorrdss.push_back(sourceCoords[10]);	texCorrdss.push_back(sourceCoords[11]);
+
 			cps = cpn;
 		}
 		m_pTrack->PointDistances.push_back(distancetotal);
@@ -1005,7 +1033,7 @@ void TrainView::ComputeDistance()
 
 	if (mapRoadShader.shader != nullptr)
 	{
-		mapRoadShader.SetVAO(vertices, elements);
+		mapRoadShader.SetVAO(vertices, elements, texCorrdss);
 	}
 }
 

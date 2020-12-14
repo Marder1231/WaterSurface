@@ -22,6 +22,7 @@
 
 // Preclarify to prevent the compiler error
 class LightingWidget;
+class WaveWidget;
 class TrainWindow;
 class Fl_Widget;
 
@@ -34,6 +35,8 @@ void runButtonCB(TrainWindow* tw);
 void ChoiceWhichOAttributeCB(Fl_Button* w, TrainWindow* tw);
 
 void UpdataShaderCB(Fl_Button* w, TrainWindow* tw);
+
+void ChooseWaveTypeCB(Fl_Browser* w, WaveWidget* ww);
 
 //------------------------------------------------------------------------
 //                         LightingWidget call back

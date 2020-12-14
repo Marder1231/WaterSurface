@@ -34,6 +34,12 @@ uniform int u_time;
 
 uniform vec3 u_cameraPos;
 
+uniform float u_amplitude;
+
+//sine = 0
+//height map = 1
+uniform int u_chooseWaveType;
+
 //reference : http://www.zwqxin.com/archives/opengl/water-simulation-3.html
 float Cal_Ripple(float dist_to_waveCenter, float waveCenterAmplitude, float time)
 {
@@ -68,17 +74,20 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 }
 void main(void)
 {
-	float amplitude = 2.460f;
 	float speed = 2;
-	float waveLength = 10;
+	float waveLength = 100;
 
 	f_position = interpolate3D(e_position[0],e_position[1], e_position[2]);
 	f_textCoords = interpolate2D(e_textCoords[0],e_textCoords[1], e_textCoords[2]);
 
 	vec3 p = f_position;
-	float height = vec3(texture(u_heightMap, f_textCoords)).x;
-//    float height = sin(f_textCoords.x*2*2*3.1415926);
-	height = (height - 0.5f) * amplitude;
+	float height = 0;
+	if(u_chooseWaveType == 1)
+		height = 1.246f * vec3(texture(u_heightMap, f_textCoords)).x;
+	else if(u_chooseWaveType == 0)
+		height = sin(2 * 3.1415926 * (f_position.x + u_time) / waveLength);
+
+	height = (height - 0.5f) * u_amplitude;
 	p.y += height;
 
 	for(int i = 0; i < NumOfRipples; i++)
@@ -88,7 +97,7 @@ void main(void)
 		vec3 ripplePos = Ripples[i].GenerateCenter;
 		ripplePos.y = f_position.y;
 
-		float circleHeight = CircleWave(length(ripplePos- f_position), amplitude, u_time - Ripples[i].AnimateTime);
+		float circleHeight = CircleWave(length(ripplePos- f_position), u_amplitude, u_time - Ripples[i].AnimateTime);
 		
 		if(circleHeight >= 0.024f)
 			p.y += circleHeight;
@@ -103,7 +112,7 @@ void main(void)
 //		vec3 ripplePos = c_majorRipples[0][i].GenerateCenter;
 //		ripplePos.y = f_position.y;
 //		
-//		float circleHeight = CircleWave(length(ripplePos- f_position), amplitude, u_time - c_majorRipples[0][i].AnimateTime);
+//		float circleHeight = CircleWave(length(ripplePos- f_position), u_amplitude, u_time - c_majorRipples[0][i].AnimateTime);
 //		
 //		if(circleHeight >= 0.024f)
 //			p.y += circleHeight;

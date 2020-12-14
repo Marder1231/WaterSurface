@@ -104,7 +104,7 @@ void main()
     float glass = 1.52f;
     float diamond = 2.42f;
     //          from / into;
-    float ratio = air / air;
+    float ratio = air / water;
 
     vec3 result = vec3(0);
     vec3 R;
@@ -112,7 +112,7 @@ void main()
     R = refract(-viewDir, norm, ratio);
 //    R.x = -R.x;
 //    R.z = -R.z;
-    result += vec3(1.0f * texture(material.u_skybox, R).rgb );
+    result += vec3(0.5f * texture(material.u_skybox, R).rgb );
 
     R = reflect(-viewDir, norm);
     result += vec3(.5f * texture(material.u_skybox, R).rgb);
@@ -125,12 +125,12 @@ void main()
     // == =====================================================
     // phase 1: directional lighting
     
-//    for(int i = 0; i < u_DirLightAmount; i++)
-//        result += CalcDirLight(dirLights[i], norm, viewDir);  
-//    for(int i = 0; i < u_PointLightAmount; i++)
-//        result += CalcPointLight(pointLights[i], norm, f_position, viewDir);
-//    for(int i = 0; i < u_SpotLightAmount; i++)
-//        result += CalcSpotLight(spotLights[i], norm, f_position, viewDir);
+    for(int i = 0; i < u_DirLightAmount; i++)
+        result += CalcDirLight(dirLights[i], norm, viewDir);  
+    for(int i = 0; i < u_PointLightAmount; i++)
+        result += CalcPointLight(pointLights[i], norm, f_position, viewDir);
+    for(int i = 0; i < u_SpotLightAmount; i++)
+        result += CalcSpotLight(spotLights[i], norm, f_position, viewDir);
 
     FragColor = vec4((result) , 1.0) ;
 }
