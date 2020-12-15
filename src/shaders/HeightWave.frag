@@ -60,6 +60,9 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLights[NR_SPOT_LIGHTS];
 uniform Material material;
 
+uniform float u_refractAttenuate;
+uniform float u_reflectAttenuate;
+
 // function prototypes
 vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 f_position, vec3 viewDir);
@@ -100,6 +103,7 @@ void main()
 
     float air = 1.00f;
     float water = 1.33f;
+    float clearWater = 1.246f;
     float ice = 1.309f;
     float glass = 1.52f;
     float diamond = 2.42f;
@@ -112,10 +116,10 @@ void main()
     R = refract(-viewDir, norm, ratio);
 //    R.x = -R.x;
 //    R.z = -R.z;
-    result += vec3(0.5f * texture(material.u_skybox, R).rgb );
+    result += vec3(u_refractAttenuate * texture(material.u_skybox, R).rgb );
 
     R = reflect(-viewDir, norm);
-    result += vec3(.5f * texture(material.u_skybox, R).rgb);
+    result += vec3(u_reflectAttenuate * texture(material.u_skybox, R).rgb);
 //    result = norm;
     // == =====================================================
     // Our lighting is set up in 3 phases: directional, point lights and an optional flashlight

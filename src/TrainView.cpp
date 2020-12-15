@@ -488,6 +488,8 @@ void TrainView::draw()
 	glFrontFace(GL_CCW);
 	heightMapShader.Use(viewPos);
 	heightMapShader.shader->setFloat("u_amplitude", tw->waveWidget->amplitude->value());
+	heightMapShader.shader->setFloat("u_reflectAttenuate", tw->waveWidget->reflectAttenuate->value() / 10.0f);
+	heightMapShader.shader->setFloat("u_refractAttenuate", tw->waveWidget->refractAttenuate->value() / 10.0f);
 	heightMapShader.shader->setInt("u_chooseWaveType", int(tw->waveWidget->NowChoiceWaveType));
 	HeightWave.Draw(&heightMapShader, skyBoxShader.cubemapTexture, viewPos);
 	heightMapShader.Unuse();

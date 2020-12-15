@@ -70,6 +70,8 @@ public:
 	Fl_Value_Slider* amplitude = nullptr;
 	Fl_Value_Slider* speed = nullptr;
 	Fl_Value_Slider* rainSize = nullptr;
+	Fl_Value_Slider* reflectAttenuate = nullptr;
+	Fl_Value_Slider* refractAttenuate = nullptr;
 
 	enum class EmWaveType : int
 	{
@@ -98,14 +100,14 @@ public:
 		pty += 124 + 10;
 		amplitude = new Fl_Value_Slider(700, pty, 100, 20, "Amplitude");
 		amplitude->range(0, 10);
-		amplitude->value(0.24);
+		amplitude->value(2.46f);
 		amplitude->align(FL_ALIGN_LEFT);
 		amplitude->type(FL_HORIZONTAL);
 
 		pty += 20 + 10;
 		speed = new Fl_Value_Slider(700, pty, 100, 20, "Speed");
 		speed->range(0, 10);
-		speed->value(2.46f);
+		speed->value(0.246f);
 		speed->align(FL_ALIGN_LEFT);
 		speed->type(FL_HORIZONTAL);
 
@@ -115,6 +117,20 @@ public:
 		rainSize->value(0);
 		rainSize->align(FL_ALIGN_LEFT);
 		rainSize->type(FL_HORIZONTAL);
+
+		pty += 20 + 10;
+		reflectAttenuate = new Fl_Value_Slider(700, pty, 100, 20, "reflect");
+		reflectAttenuate->range(0, 10);
+		reflectAttenuate->value(6.24f);
+		reflectAttenuate->align(FL_ALIGN_LEFT);
+		reflectAttenuate->type(FL_HORIZONTAL);
+
+		pty += 20 + 10;
+		refractAttenuate = new Fl_Value_Slider(700, pty, 100, 20, "refract");
+		refractAttenuate->range(0, 10);
+		refractAttenuate->value(6.24f);
+		refractAttenuate->align(FL_ALIGN_LEFT);
+		refractAttenuate->type(FL_HORIZONTAL);
 
 		this->end();
 	}

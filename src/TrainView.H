@@ -319,8 +319,8 @@ public:
 	unsigned int skyboxID;
 	virtual void InitShaderAttribute() override
 	{
-		shader->setVec3("material.diffuse", .12f, .26f, .624f);
-		shader->setVec3("material.specular", .12f, .26f, .624f);
+		shader->setVec3("material.diffuse", .12f, .246f, .520f);
+		shader->setVec3("material.specular", .12f, .246f, .520f);
 		shader->setFloat("material.shininess", 32.0f);
 
 		shader->setInt("material.u_skybox", 0);
